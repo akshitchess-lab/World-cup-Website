@@ -1046,12 +1046,12 @@ const GROUP_MATCHES = [
   {id:64, group:'K', date:'Jun 20', t1:'Colombia',     t2:'DR Congo',     type:'group', heading:'Group K'},
   {id:65, group:'K', date:'Jun 24', t1:'Colombia',     t2:'Portugal',     type:'group', heading:'Group K'},
   {id:66, group:'K', date:'Jun 24', t1:'DR Congo',     t2:'Uzbekistan',   type:'group', heading:'Group K'},
+  {id:72, group:'L', date:'Jun 25', t1:'Croatia',      t2:'Ghana',        type:'group', heading:'Group L'},
   {id:67, group:'L', date:'Jun 16', t1:'Ghana',        t2:'Panama',       type:'group', heading:'Group L'},
   {id:68, group:'L', date:'Jun 16', t1:'England',      t2:'Croatia',      type:'group', heading:'Group L'},
   {id:69, group:'L', date:'Jun 20', t1:'England',      t2:'Ghana',        type:'group', heading:'Group L'},
   {id:70, group:'L', date:'Jun 21', t1:'Panama',       t2:'Croatia',      type:'group', heading:'Group L'},
   {id:71, group:'L', date:'Jun 24', t1:'Panama',       t2:'England',      type:'group', heading:'Group L'},
-  {id:72, group:'L', date:'Jun 25', t1:'Croatia',      t2:'Ghana',        type:'group', heading:'Group L'},
 ];
 
 const KNOCKOUT_MATCHES = [
@@ -1343,6 +1343,7 @@ function showToast(msg, type = 'success') {
 }
 
 function flagShield(teamName) {
+  if (!teamName || teamName === 'TBD') return `<div class="flag-shield" style="background:#1e293b; color:#fff">TBD</div>`;
   const c = TEAM_COLORS[teamName] || { bg: '#334155', text: '#ffffff' };
   const abbr = TEAM_ABBR[teamName] || teamName.substring(0,3).toUpperCase();
   return `<div class="flag-shield" style="background:${c.bg};color:${c.text};">${abbr}</div>`;
@@ -1584,9 +1585,8 @@ function recalculateAccuracyPoints() {
 function getSimulatedActualWinner(mid) {
   const actual = appState.simulatedActuals[mid];
   if (!actual || !actual.completed) return null;
-  const mNode = KNOCKOUT_MATCHES.find(m => m.id === mid);
   const kd = appState.knockoutTeams[mid];
-  if (!mNode || !kd) return null;
+  if (!kd) return null;
 
   const g1 = parseInt(actual.g1)||0;
   const g2 = parseInt(actual.g2)||0;
@@ -1702,6 +1702,11 @@ function onScoreInput(mid) {
       else           { penBlock.classList.remove('visible'); penBlock.style.display = 'none'; }
     }
   }
+  
+  // FIX: Recalculate bracket steps instantly when fields are updated manually
+  computeGroupStandings();
+  computeWildcards();
+  populateKnockoutTeams();
   saveStateToStorage();
 }
 
@@ -1727,6 +1732,8 @@ function onPenInput(mid) {
     else if (pen2 > pen1) winEl.textContent = `🏅 ${t2} advance`;
     else winEl.textContent = '';
   }
+  
+  populateKnockoutTeams();
   saveStateToStorage();
 }
 
@@ -1751,7 +1758,7 @@ function toggleIgnite(mid) {
     appState.tokensLeft++;
     appState.scores[mid].ignited = false;
     appState.ignitedMatches = appState.ignitedMatches.filter(i => i !== mid);
-    const card = document.getElementById('card-' + removeId);
+    const card = document.getElementById('card-' + mid);
     if (card) card.classList.remove('ignited');
     const btn = document.getElementById('ignite-btn-' + mid);
     if (btn) btn.classList.remove('active');
@@ -1825,7 +1832,7 @@ function saveCurrentTab() {
   renderCurrentTab();
   saveStateToStorage();
 
-  showToast(`✅ ${count} outcomes committed to processing matrices!`, 'success');
+  showToast(`¼ ${count} outcomes committed to processing matrices!`, 'success');
 }
 
 function renderStandingsTable(group) {
@@ -2071,14 +2078,10 @@ function renderBracketSVG() {
   </svg>`;
 }
 
-// ──────────────────────────────────────────────────────────────
-// IMPROVED LEADERBOARD TAB SYSTEM WITH EVENTUAL RESULT TILE
-// ──────────────────────────────────────────────────────────────
 function renderLeaderboard() {
   const actualChamp = getSimulatedActualWinner(104);
   const predictedChamp = getChampion();
 
-  // Unified eventual tournament validation dashboard banner
   let validationBanner = '';
   if (actualChamp) {
     const isCorrectChamp = actualChamp === predictedChamp;
@@ -2102,7 +2105,6 @@ function renderLeaderboard() {
     </div>`;
   }
 
-  // Adjust bot curves cleanly alongside the total points accumulated inside the engine
   const baseModifier = appState.points || 0;
   const fakeLeaderboard = [
     { name: '@PunditPro (You)', pts: baseModifier, you: true },
@@ -2116,7 +2118,7 @@ function renderLeaderboard() {
   const rows = fakeLeaderboard.map((u, i) => `
     <div class="lb-row">
       <div class="lb-rank ${rankClasses[i] || 'other'}">${i+1}</div>
-      <div class="lb-name" style="${u.you ? 'color:var(--accent-sky);font-weight:800' : ''}">${u.name}${u.you ? ' 👈' : ''}</div>
+      <div class="lb-name" style="${u.you ? 'color:var(--accent-sky);font-weight:800' : ''}">${u.name}</div>
       <div class="lb-pts">${u.pts} XP</div>
     </div>`).join('');
 
@@ -2246,7 +2248,9 @@ function randomizeAll() {
 
   computeGroupStandings(); computeWildcards(); populateKnockoutTeams();
 
-  ['R32','R16','QF','SF','3P','Final'].forEach(round => {
+  // FIX: Force internal data map updates sequentially to prevent generic text breaks
+  const rounds = ['R32', 'R16', 'QF', 'SF', '3P', 'Final'];
+  rounds.forEach(round => {
     const rKey = round === 'Final' ? 'F' : round;
     KNOCKOUT_MATCHES.filter(m => m.round === rKey).forEach(m => {
       const kd = appState.knockoutTeams[m.id];
@@ -2256,11 +2260,11 @@ function randomizeAll() {
       if (g1 === g2) { pen1 = Math.floor(Math.random()*2)+4; pen2 = Math.floor(Math.random()*3); }
       appState.scores[m.id] = { g1, g2, pen1, pen2, saved: true, ignited: appState.scores[m.id]?.ignited || false };
       if (!appState.savedMatches.includes(m.id)) appState.savedMatches.push(m.id);
-      processKnockoutBranchPromotion(m.id);
     });
+    populateKnockoutTeams();
   });
 
-  computeGroupStandings(); computeWildcards(); populateKnockoutTeams(); recalculateAccuracyPoints();
+  recalculateAccuracyPoints();
   updateStatBar(); updateGuide(); updateAchievements(); renderCurrentTab(); renderSubPills(); saveStateToStorage();
   showToast('🎲 All 104 matches randomized!', 'success');
 }

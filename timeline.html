@@ -168,7 +168,7 @@ GROUP_MATCHES.forEach(m=>{const d=Math.floor(15+Math.random()*20),t=Math.max(10,
 
 const ALL_DATES=[...new Set(GROUP_MATCHES.map(m=>m.date))].sort((a,b)=>{ const months={'Jun':6,'Jul':7};const [ma,da]=a.split(' ');const [mb,db]=b.split(' ');return months[ma]*100+parseInt(da)-(months[mb]*100+parseInt(db)); });
 
-let appState={scores:{},tokensLeft:3,ignitedMatches:[],savedMatches:[],activeDate:'All',points:0};
+let appState={scores:{},tokensLeft:5,ignitedMatches:[],savedMatches:[],activeDate:'All',points:0};
 
 function loadState(){
   try{

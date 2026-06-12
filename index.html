@@ -528,7 +528,7 @@ table.st tr:last-child td{border-bottom:none;}
 </div>
 <div class="pills-bar" id="sub-pills"></div>
 <div class="action-row">
-  <button class="btn-save" onclick="saveCurrentGroup()">💾 Save Group</button>
+  <!--<button class="btn-save" id="save-group-btn" onclick="saveCurrentGroup()">💾 Save Group</button>-->
   <button class="btn-random" onclick="randomizeGroup()">🎲 Randomize</button>
   <button class="btn-danger" onclick="resetGroup()">🗑 Reset Group</button>
   <button class="btn-proceed" onclick="goToKnockout()">⚔️ Proceed to Knockouts →</button>
@@ -1055,8 +1055,17 @@ function gRenderPills(s) {
 function gSelectGroup(g) {
   const s = getState(); s.gPill = g; saveState(s);
   gRenderPills(s); gRenderTab(s);
+  const btn = document.getElementById('save-group-btn');
+  if (btn) {
+    if (g === 'L') {
+      btn.innerHTML = '💾 Save All 72 Predictions';
+      btn.onclick = saveAllGroups;
+    } else {
+      btn.innerHTML = '💾 Save Group';
+      btn.onclick = saveCurrentGroup;
+    }
+  }
 }
-
 function gRenderTab(s) {
   const g = s.gPill || 'A';
   const matches = GROUP_MATCHES.filter(m => m.group===g);
@@ -1240,7 +1249,38 @@ function saveCurrentGroup() {
   gRenderPills(s); gRenderTab(s); gUpdateBar(s);
   showToast(`✅ Group ${g} saved!`);
 }
+function saveAllGroups() {
+  const s = getState();
+  // First save current group L from DOM
+  GROUP_MATCHES.filter(m => m.group==='L').forEach(m => {
+    const actual = (s.actuals||{})[sid(m.id)];
+    if (actual?.completed) return;
+    const s1 = document.getElementById('s1-'+m.id);
+    const s2 = document.getElementById('s2-'+m.id);
+    if (!s1||!s2) return;
+    if (!s.scores) s.scores = {};
+    if (!s.scores[sid(m.id)]) s.scores[sid(m.id)] = {g1:0,g2:0,saved:false,doubled:false};
+    s.scores[sid(m.id)].g1 = parseInt(s1.value)||0;
+    s.scores[sid(m.id)].g2 = parseInt(s2.value)||0;
+    s.scores[sid(m.id)].saved = true;
+    markSaved(s,m.id);
+  });
+  computeGroupStandings(s); computeWildcards(s); saveState(s);
 
+  // Sync ALL 72 groups from localStorage to Supabase
+  let count = 0;
+  GROUP_MATCHES.forEach(m => {
+    const actual = (s.actuals||{})[sid(m.id)];
+    if (actual?.completed) return;
+    const sc = s.scores[sid(m.id)];
+    if (!sc || !sc.saved) return;
+    syncPredictionToSupabase(m.id, sc.g1, sc.g2, sc.doubled);
+    count++;
+  });
+
+  gRenderPills(s); gRenderTab(s); gUpdateBar(s);
+  showToast(`✅ All ${count} group predictions saved!`);
+}
 // FIX 4: Randomize skips completed matches
 function randomizeGroup() {
   const s = getState(); const g = s.gPill||'A';

@@ -527,7 +527,7 @@ table.st tr:last-child td{border-bottom:none;}
 </div>
 <div class="pills-bar" id="sub-pills"></div>
 <div class="action-row">
-  <button class="btn-save" id="btn-save-group" onclick="saveCurrentGroup()">💾 Save Groups</button>
+  <button class="btn-save" id="btn-save-group" onclick="saveAllGroups()">💾 Save Groups</button>
   <button class="btn-random" onclick="randomizeGroup()">🎲 Randomize</button>
   <button class="btn-danger" onclick="resetGroup()">🗑 Reset Group</button>
   <button class="btn-proceed" onclick="goToKnockout()">⚔️ Proceed to Knockouts →</button>
@@ -1120,22 +1120,15 @@ function gRenderPills(s) {
     return `<button class="pill${(s.gPill||'A')===g?' active':''}" onclick="gSelectGroup('${g}')">Group ${g} <span style="font-size:9px">${saved}/6</span></button>`;
   }).join('');
   const saveBtn = document.getElementById('btn-save-group');
-  if (saveBtn) saveBtn.style.display = (s.gPill||'A')==='L' ? '' : 'none';
+  if (saveBtn) {
+    saveBtn.style.display = (s.gPill||'A')==='L' ? '' : 'none';
+    saveBtn.onclick = saveAllGroups;
+  }
 }
 
 function gSelectGroup(g) {
   const s = getState(); s.gPill = g; saveState(s);
   gRenderPills(s); gRenderTab(s);
-  const btn = document.getElementById('save-group-btn');
-  if (btn) {
-    if (g === 'L') {
-      btn.innerHTML = '💾 Save All 72 Predictions';
-      btn.onclick = saveAllGroups;
-    } else {
-      btn.innerHTML = '💾 Save Group';
-      btn.onclick = saveCurrentGroup;
-    }
-  }
 }
 function gRenderTab(s) {
   const g = s.gPill || 'A';

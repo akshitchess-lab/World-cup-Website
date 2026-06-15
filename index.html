@@ -1656,21 +1656,94 @@ function lbRenderPodium(entries){
 function lbRenderTable(entries){
   const filtered=entries.filter(u=>{
     if(lbSearch&&!u.handle.toLowerCase().includes(lbSearch.toLowerCase()))return false;
-    if(lbFilter==='exact'&&u.exact===0)return false;if(lbFilter==='margin'&&u.margin===0)return false;
-    if(lbFilter==='outcome'&&u.result===0)return false;if(lbFilter==='doubled'&&u.doubled===0)return false;return true;
+    if(lbFilter==='exact'&&u.exact===0)return false;
+    if(lbFilter==='margin'&&u.margin===0)return false;
+    if(lbFilter==='outcome'&&u.result===0)return false;
+    if(lbFilter==='doubled'&&u.doubled===0)return false;
+    return true;
   });
-  const rankCls=r=>r===1?'rank-1':r===2?'rank-2':r===3?'rank-3':'rank-other';
-  const tIcon=t=>t==='up'?'<span class="trend-up">▲</span>':t==='down'?'<span class="trend-down">▼</span>':'<span class="trend-flat">—</span>';
-  document.getElementById('lb-table').innerHTML=filtered.map(u=>`
-    <div class="lb-row${u.you?' you-row':''}">
-      <div class="lb-rank-badge ${rankCls(u.rank)}">${u.rank}</div>
-      <div class="lb-avatar" style="background:rgba(56,189,248,0.06)">${u.emoji}</div>
-      <div class="lb-info">
-        <div class="lb-handle${u.you?' you':''}">${u.handle} ${u.you?'<span class="lb-badge-you">YOU</span>':''} ${tIcon(u.trend)}</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">🥇${u.exact} exact · 🥈${u.margin} margin · 🥉${u.result} result · ✕2 ${u.doubled}</div>
-      </div>
-      <div class="lb-right"><div class="lb-xp">${u.pts}</div><div class="lb-xp-label">pts</div></div>
-    </div>`).join('')||'<div style="text-align:center;padding:32px;color:var(--text-muted)">No entries match filter.</div>';
+
+  // Show only Top 10
+  let displayEntries = filtered.slice(0,10);
+
+  // Find current user
+  const currentUser = filtered.find(u => u.you);
+
+  // If current user is outside Top 10, append them below
+  if(
+    currentUser &&
+    !displayEntries.some(u => u.userId === currentUser.userId)
+  ){
+    displayEntries.push({
+      separator:true
+    });
+
+    displayEntries.push(currentUser);
+  }
+
+  const rankCls=r=>
+    r===1?'rank-1':
+    r===2?'rank-2':
+    r===3?'rank-3':
+    'rank-other';
+
+  const tIcon=t=>
+    t==='up'
+      ?'<span class="trend-up">▲</span>'
+      :t==='down'
+      ?'<span class="trend-down">▼</span>'
+      :'<span class="trend-flat">—</span>';
+
+  document.getElementById('lb-table').innerHTML=
+    displayEntries.map(u=>{
+
+      if(u.separator){
+        return `
+          <div style="
+            padding:12px;
+            text-align:center;
+            color:var(--text-muted);
+            font-size:11px;
+            border-top:1px solid var(--border-subtle);
+            border-bottom:1px solid var(--border-subtle);
+            background:var(--bg-card3);
+          ">
+            Your Position
+          </div>
+        `;
+      }
+
+      return `
+        <div class="lb-row${u.you?' you-row':''}">
+          <div class="lb-rank-badge ${rankCls(u.rank)}">${u.rank}</div>
+
+          <div class="lb-avatar" style="background:rgba(56,189,248,0.06)">
+            ${u.emoji}
+          </div>
+
+          <div class="lb-info">
+            <div class="lb-handle${u.you?' you':''}">
+              ${u.handle}
+              ${u.you?'<span class="lb-badge-you">YOU</span>':''}
+              ${tIcon(u.trend)}
+            </div>
+
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">
+              🥇${u.exact} exact ·
+              🥈${u.margin} margin ·
+              🥉${u.result} result ·
+              ✕2 ${u.doubled}
+            </div>
+          </div>
+
+          <div class="lb-right">
+            <div class="lb-xp">${u.pts}</div>
+            <div class="lb-xp-label">pts</div>
+          </div>
+        </div>
+      `;
+    }).join('')
+    || '<div style="text-align:center;padding:32px;color:var(--text-muted)">No entries match filter.</div>';
 }
 
 function lbRenderChamp(s){

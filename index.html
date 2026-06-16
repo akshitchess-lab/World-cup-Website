@@ -1217,7 +1217,8 @@ function saveAllGroups(){
   gRenderPills(s);gRenderTab(s);gUpdateBar(s);showToast(`✅ All ${count} group predictions saved!`);
 }
 
-function randomizeGroup(){
+function randomizeGroup(){requireProfile(()=>_randomizeGroup());}
+function _randomizeGroup(){
   const s=getState();const g=s.gPill||'A';let skipped=0;
   GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
     const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed){skipped++;return;}

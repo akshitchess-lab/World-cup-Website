@@ -402,7 +402,7 @@ table.st tr:last-child td{border-bottom:none;}
   </div>
 </nav>
 <section class="hero">
-  <div class="hero-eyebrow"><span class="live-dot"></span>2026 FIFA World Cup · Jun 11 – Jul 26</div>
+  <div class="hero-eyebrow"><span class="live-dot"></span>2026 FIFA World Cup · Jun 11 – Jul 19</div>
   <h1 class="hero-title">Build Your<br><span class="line2">World Cup Bracket.</span></h1>
   <p class="hero-subtitle">Predict every one of 104 matches — Group Stage through the Grand Final — and earn points as the real tournament unfolds.</p>
   <div class="hero-ctas">
@@ -509,7 +509,7 @@ table.st tr:last-child td{border-bottom:none;}
     <h2 class="cta-title">Who lifts the trophy <span>in July?</span></h2>
     <p class="cta-sub">Build your complete bracket before the tournament starts — then let the real results do the talking.</p>
     <button onclick="goToGroups()" class="btn-launch-large">Start My Prediction Bracket →</button>
-    <div style="margin-top:18px;font-size:12px;color:var(--text-muted)">No account needed. Predictions auto-save in your browser.</div>
+    <div style="margin-top:18px;font-size:12px;color:var(--text-muted)">Login to see your position in the leaderboard. It appears when you predict your 1st match.</div>
   </div>
 </section>
 <footer>
@@ -539,7 +539,7 @@ table.st tr:last-child td{border-bottom:none;}
 </div>
 <div class="pills-bar" id="sub-pills"></div>
 <div class="action-row">
-  <button class="btn-save" id="btn-save-group" onclick="saveAllGroups()">💾 Save Groups</button>
+  <button class="btn-save" id="btn-save-group" onclick="saveAllGroups()">💾 Save All Groups</button>
   <button class="btn-random" onclick="randomizeGroup()">🎲 Randomize</button>
   <button class="btn-danger" onclick="resetGroup()">🗑 Reset Group</button>
   <button class="btn-proceed" onclick="goToKnockout()">⚔️ Proceed to Knockouts →</button>
@@ -699,22 +699,15 @@ table.st tr:last-child td{border-bottom:none;}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ══════════════════════════════════════════════════════
-// SUPABASE INIT
-// ══════════════════════════════════════════════════════
 const { createClient } = window.supabase;
 const supabaseClient = createClient(
   "https://hqbnekjedyxuarnqujfl.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxYm5la2plZHl4dWFybnF1amZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODA3MzksImV4cCI6MjA5Njg1NjczOX0.GrZ7HR4AWfr3D-4npBlBIQJtbiJTM65LYY5Fb-eFdHc"
 );
 
-// ══════════════════════════════════════════════════════
-// CONSTANTS & DATA
-// ══════════════════════════════════════════════════════
 const STORAGE_KEY = 'punditleague_pro_2026_v2';
 const ADMIN_PASSWORD = 'admin2026';
 const MAX_DOUBLES = 5;
-
 const KO_MATCH_IDS = new Set(Array.from({length:32}, (_,i) => i+73));
 
 const ALL_TEAMS = [
@@ -745,38 +738,113 @@ const ABBR = {
 };
 
 const GROUP_MATCHES = [
-  {id:1,group:'A',date:'Jun 11',t1:'Mexico',t2:'South Africa'},{id:2,group:'A',date:'Jun 11',t1:'South Korea',t2:'Czechia'},{id:3,group:'A',date:'Jun 15',t1:'Czechia',t2:'South Africa'},{id:4,group:'A',date:'Jun 15',t1:'Mexico',t2:'South Korea'},{id:5,group:'A',date:'Jun 19',t1:'Czechia',t2:'Mexico'},{id:6,group:'A',date:'Jun 19',t1:'South Africa',t2:'South Korea'},
-  {id:7,group:'B',date:'Jun 11',t1:'Canada',t2:'Bosnia'},{id:8,group:'B',date:'Jun 12',t1:'Qatar',t2:'Switzerland'},{id:9,group:'B',date:'Jun 15',t1:'Switzerland',t2:'Bosnia'},{id:10,group:'B',date:'Jun 16',t1:'Canada',t2:'Qatar'},{id:11,group:'B',date:'Jun 20',t1:'Switzerland',t2:'Canada'},{id:12,group:'B',date:'Jun 20',t1:'Bosnia',t2:'Qatar'},
-  {id:13,group:'C',date:'Jun 12',t1:'Brazil',t2:'Morocco'},{id:14,group:'C',date:'Jun 12',t1:'Haiti',t2:'Scotland'},{id:15,group:'C',date:'Jun 16',t1:'Brazil',t2:'Haiti'},{id:16,group:'C',date:'Jun 16',t1:'Scotland',t2:'Morocco'},{id:17,group:'C',date:'Jun 20',t1:'Scotland',t2:'Brazil'},{id:18,group:'C',date:'Jun 20',t1:'Morocco',t2:'Haiti'},
-  {id:19,group:'D',date:'Jun 12',t1:'United States',t2:'Paraguay'},{id:20,group:'D',date:'Jun 13',t1:'Australia',t2:'Türkiye'},{id:21,group:'D',date:'Jun 16',t1:'Türkiye',t2:'Paraguay'},{id:22,group:'D',date:'Jun 17',t1:'United States',t2:'Australia'},{id:23,group:'D',date:'Jun 21',t1:'Türkiye',t2:'United States'},{id:24,group:'D',date:'Jun 21',t1:'Paraguay',t2:'Australia'},
-  {id:25,group:'E',date:'Jun 13',t1:'Ivory Coast',t2:'Ecuador'},{id:26,group:'E',date:'Jun 13',t1:'Germany',t2:'Curaçao'},{id:27,group:'E',date:'Jun 17',t1:'Germany',t2:'Ivory Coast'},{id:28,group:'E',date:'Jun 17',t1:'Ecuador',t2:'Curaçao'},{id:29,group:'E',date:'Jun 21',t1:'Curaçao',t2:'Ivory Coast'},{id:30,group:'E',date:'Jun 21',t1:'Ecuador',t2:'Germany'},
-  {id:31,group:'F',date:'Jun 13',t1:'Netherlands',t2:'Japan'},{id:32,group:'F',date:'Jun 14',t1:'Sweden',t2:'Tunisia'},{id:33,group:'F',date:'Jun 17',t1:'Netherlands',t2:'Sweden'},{id:34,group:'F',date:'Jun 18',t1:'Tunisia',t2:'Japan'},{id:35,group:'F',date:'Jun 22',t1:'Japan',t2:'Sweden'},{id:36,group:'F',date:'Jun 22',t1:'Tunisia',t2:'Netherlands'},
-  {id:37,group:'G',date:'Jun 14',t1:'Iran',t2:'New Zealand'},{id:38,group:'G',date:'Jun 14',t1:'Belgium',t2:'Egypt'},{id:39,group:'G',date:'Jun 18',t1:'Belgium',t2:'Iran'},{id:40,group:'G',date:'Jun 18',t1:'New Zealand',t2:'Egypt'},{id:41,group:'G',date:'Jun 22',t1:'New Zealand',t2:'Belgium'},{id:42,group:'G',date:'Jun 22',t1:'Egypt',t2:'Iran'},
-  {id:43,group:'H',date:'Jun 14',t1:'Saudi Arabia',t2:'Uruguay'},{id:44,group:'H',date:'Jun 14',t1:'Spain',t2:'Cabo Verde'},{id:45,group:'H',date:'Jun 18',t1:'Uruguay',t2:'Cabo Verde'},{id:46,group:'H',date:'Jun 19',t1:'Spain',t2:'Saudi Arabia'},{id:47,group:'H',date:'Jun 22',t1:'Cabo Verde',t2:'Saudi Arabia'},{id:48,group:'H',date:'Jun 23',t1:'Uruguay',t2:'Spain'},
-  {id:49,group:'I',date:'Jun 14',t1:'France',t2:'Senegal'},{id:50,group:'I',date:'Jun 15',t1:'Iraq',t2:'Norway'},{id:51,group:'I',date:'Jun 19',t1:'Norway',t2:'Senegal'},{id:52,group:'I',date:'Jun 19',t1:'France',t2:'Iraq'},{id:53,group:'I',date:'Jun 23',t1:'Norway',t2:'France'},{id:54,group:'I',date:'Jun 23',t1:'Senegal',t2:'Iraq'},
-  {id:55,group:'J',date:'Jun 15',t1:'Argentina',t2:'Algeria'},{id:56,group:'J',date:'Jun 15',t1:'Austria',t2:'Jordan'},{id:57,group:'J',date:'Jun 19',t1:'Argentina',t2:'Austria'},{id:58,group:'J',date:'Jun 20',t1:'Jordan',t2:'Algeria'},{id:59,group:'J',date:'Jun 23',t1:'Algeria',t2:'Austria'},{id:60,group:'J',date:'Jun 24',t1:'Jordan',t2:'Argentina'},
-  {id:61,group:'K',date:'Jun 15',t1:'Portugal',t2:'DR Congo'},{id:62,group:'K',date:'Jun 16',t1:'Uzbekistan',t2:'Colombia'},{id:63,group:'K',date:'Jun 20',t1:'Portugal',t2:'Uzbekistan'},{id:64,group:'K',date:'Jun 20',t1:'Colombia',t2:'DR Congo'},{id:65,group:'K',date:'Jun 24',t1:'Colombia',t2:'Portugal'},{id:66,group:'K',date:'Jun 24',t1:'DR Congo',t2:'Uzbekistan'},
-  {id:67,group:'L',date:'Jun 16',t1:'Ghana',t2:'Panama'},{id:68,group:'L',date:'Jun 16',t1:'England',t2:'Croatia'},{id:69,group:'L',date:'Jun 20',t1:'England',t2:'Ghana'},{id:70,group:'L',date:'Jun 21',t1:'Panama',t2:'Croatia'},{id:71,group:'L',date:'Jun 24',t1:'Panama',t2:'England'},{id:72,group:'L',date:'Jun 25',t1:'Croatia',t2:'Ghana'},
+  {id:1,group:'A',date:'Jun 11 · 12:30am IST',t1:'Mexico',t2:'South Africa'},
+  {id:2,group:'A',date:'Jun 11 · 12:30am IST',t1:'South Korea',t2:'Czechia'},
+  {id:3,group:'A',date:'Jun 18 · 9:30pm IST',t1:'Czechia',t2:'South Africa'},
+  {id:4,group:'A',date:'Jun 19 · 6:30am IST',t1:'Mexico',t2:'South Korea'},
+  {id:5,group:'A',date:'Jun 25 · 6:30am IST',t1:'Czechia',t2:'Mexico'},
+  {id:6,group:'A',date:'Jun 25 · 6:30am IST',t1:'South Africa',t2:'South Korea'},
+  {id:7,group:'B',date:'Jun 12 · 12:30am IST',t1:'Canada',t2:'Bosnia'},
+  {id:8,group:'B',date:'Jun 13 · 9:30pm IST',t1:'Qatar',t2:'Switzerland'},
+  {id:9,group:'B',date:'Jun 18 · 12:30am IST',t1:'Switzerland',t2:'Bosnia'},
+  {id:10,group:'B',date:'Jun 18 · 3:30am IST',t1:'Canada',t2:'Qatar'},
+  {id:11,group:'B',date:'Jun 25 · 12:30am IST',t1:'Switzerland',t2:'Canada'},
+  {id:12,group:'B',date:'Jun 25 · 12:30am IST',t1:'Bosnia',t2:'Qatar'},
+  {id:13,group:'C',date:'Jun 13 · 9:30pm IST',t1:'Brazil',t2:'Morocco'},
+  {id:14,group:'C',date:'Jun 13 · 9:30pm IST',t1:'Haiti',t2:'Scotland'},
+  {id:15,group:'C',date:'Jun 19 · 6:00am IST',t1:'Brazil',t2:'Haiti'},
+  {id:16,group:'C',date:'Jun 19 · 3:30am IST',t1:'Scotland',t2:'Morocco'},
+  {id:17,group:'C',date:'Jun 25 · 3:30am IST',t1:'Scotland',t2:'Brazil'},
+  {id:18,group:'C',date:'Jun 25 · 3:30am IST',t1:'Morocco',t2:'Haiti'},
+  {id:19,group:'D',date:'Jun 12 · 6:30am IST',t1:'United States',t2:'Paraguay'},
+  {id:20,group:'D',date:'Jun 14 · 11:30pm IST',t1:'Australia',t2:'Türkiye'},
+  {id:21,group:'D',date:'Jun 20 · 8:30am IST',t1:'Türkiye',t2:'Paraguay'},
+  {id:22,group:'D',date:'Jun 20 · 12:30am IST',t1:'United States',t2:'Australia'},
+  {id:23,group:'D',date:'Jun 26 · 7:30am IST',t1:'Türkiye',t2:'United States'},
+  {id:24,group:'D',date:'Jun 26 · 7:30am IST',t1:'Paraguay',t2:'Australia'},
+  {id:25,group:'E',date:'Jun 15 · 4:30am IST',t1:'Ivory Coast',t2:'Ecuador'},
+  {id:26,group:'E',date:'Jun 14 · 8:30pm IST',t1:'Germany',t2:'Curaçao'},
+  {id:27,group:'E',date:'Jun 21 · 1:30am IST',t1:'Germany',t2:'Ivory Coast'},
+  {id:28,group:'E',date:'Jun 21 · 5:30am IST',t1:'Ecuador',t2:'Curaçao'},
+  {id:29,group:'E',date:'Jun 26 · 1:30am IST',t1:'Curaçao',t2:'Ivory Coast'},
+  {id:30,group:'E',date:'Jun 26 · 1:30am IST',t1:'Ecuador',t2:'Germany'},
+  {id:31,group:'F',date:'Jun 14 · 8:30pm IST',t1:'Netherlands',t2:'Japan'},
+  {id:32,group:'F',date:'Jun 15 · 7:30am IST',t1:'Sweden',t2:'Tunisia'},
+  {id:33,group:'F',date:'Jun 20 · 10:30pm IST',t1:'Netherlands',t2:'Sweden'},
+  {id:34,group:'F',date:'Jun 21 · 9:30am IST',t1:'Tunisia',t2:'Japan'},
+  {id:35,group:'F',date:'Jun 26 · 4:30am IST',t1:'Japan',t2:'Sweden'},
+  {id:36,group:'F',date:'Jun 26 · 4:30am IST',t1:'Tunisia',t2:'Netherlands'},
+  {id:37,group:'G',date:'Jun 16 · 6:30am IST',t1:'Iran',t2:'New Zealand'},
+  {id:38,group:'G',date:'Jun 16 · 12:30am IST',t1:'Belgium',t2:'Egypt'},
+  {id:39,group:'G',date:'Jun 21 · 12:30am IST',t1:'Belgium',t2:'Iran'},
+  {id:40,group:'G',date:'Jun 22 · 6:30am IST',t1:'New Zealand',t2:'Egypt'},
+  {id:41,group:'G',date:'Jun 27 · 8:30am IST',t1:'New Zealand',t2:'Belgium'},
+  {id:42,group:'G',date:'Jun 27 · 8:30am IST',t1:'Egypt',t2:'Iran'},
+  {id:43,group:'H',date:'Jun 16 · 3:30am IST',t1:'Saudi Arabia',t2:'Uruguay'},
+  {id:44,group:'H',date:'Jun 15 · 9:30pm IST',t1:'Spain',t2:'Cabo Verde'},
+  {id:45,group:'H',date:'Jun 21 · 3:30am IST',t1:'Uruguay',t2:'Cabo Verde'},
+  {id:46,group:'H',date:'Jun 21 · 9:30pm IST',t1:'Spain',t2:'Saudi Arabia'},
+  {id:47,group:'H',date:'Jun 27 · 5:30am IST',t1:'Cabo Verde',t2:'Saudi Arabia'},
+  {id:48,group:'H',date:'Jun 27 · 5:30am IST',t1:'Uruguay',t2:'Spain'},
+  {id:49,group:'I',date:'Jun 17 · 12:30am IST',t1:'France',t2:'Senegal'},
+  {id:50,group:'I',date:'Jun 17 · 3:30am IST',t1:'Iraq',t2:'Norway'},
+  {id:51,group:'I',date:'Jun 22 · 5:30am IST',t1:'Norway',t2:'Senegal'},
+  {id:52,group:'I',date:'Jun 22 · 2:30am IST',t1:'France',t2:'Iraq'},
+  {id:53,group:'I',date:'Jun 27 · 12:30am IST',t1:'Norway',t2:'France'},
+  {id:54,group:'I',date:'Jun 27 · 12:30am IST',t1:'Senegal',t2:'Iraq'},
+  {id:55,group:'J',date:'Jun 17 · 6:30am IST',t1:'Argentina',t2:'Algeria'},
+  {id:56,group:'J',date:'Jun 17 · 9:30am IST',t1:'Austria',t2:'Jordan'},
+  {id:57,group:'J',date:'Jun 22 · 10:30pm IST',t1:'Argentina',t2:'Austria'},
+  {id:58,group:'J',date:'Jun 23 · 8:30am IST',t1:'Jordan',t2:'Algeria'},
+  {id:59,group:'J',date:'Jun 28 · 7:30am IST',t1:'Algeria',t2:'Austria'},
+  {id:60,group:'J',date:'Jun 28 · 7:30am IST',t1:'Jordan',t2:'Argentina'},
+  {id:61,group:'K',date:'Jun 17 · 10:30pm IST',t1:'Portugal',t2:'DR Congo'},
+  {id:62,group:'K',date:'Jun 18 · 7:30am IST',t1:'Uzbekistan',t2:'Colombia'},
+  {id:63,group:'K',date:'Jun 23 · 10:30pm IST',t1:'Portugal',t2:'Uzbekistan'},
+  {id:64,group:'K',date:'Jun 24 · 7:30am IST',t1:'Colombia',t2:'DR Congo'},
+  {id:65,group:'K',date:'Jun 28 · 5:00am IST',t1:'Colombia',t2:'Portugal'},
+  {id:66,group:'K',date:'Jun 28 · 5:00am IST',t1:'DR Congo',t2:'Uzbekistan'},
+  {id:67,group:'L',date:'Jun 17 · 4:30am IST',t1:'Ghana',t2:'Panama'},
+  {id:68,group:'L',date:'Jun 17 · 1:30am IST',t1:'England',t2:'Croatia'},
+  {id:69,group:'L',date:'Jun 23 · 1:30am IST',t1:'England',t2:'Ghana'},
+  {id:70,group:'L',date:'Jun 24 · 4:30am IST',t1:'Panama',t2:'Croatia'},
+  {id:71,group:'L',date:'Jun 28 · 2:30am IST',t1:'Panama',t2:'England'},
+  {id:72,group:'L',date:'Jun 28 · 2:30am IST',t1:'Croatia',t2:'Ghana'},
 ];
 
 const KNOCKOUT_MATCHES = [
-  {id:73,round:'R32',label:'R32 M1',slot:'1A v WC1',date:'Jun 29'},{id:74,round:'R32',label:'R32 M2',slot:'1B v 2D',date:'Jun 29'},
-  {id:75,round:'R32',label:'R32 M3',slot:'1C v WC2',date:'Jun 30'},{id:76,round:'R32',label:'R32 M4',slot:'1D v 2B',date:'Jun 30'},
-  {id:77,round:'R32',label:'R32 M5',slot:'1E v WC3',date:'Jul 1'},{id:78,round:'R32',label:'R32 M6',slot:'1F v 2H',date:'Jul 1'},
-  {id:79,round:'R32',label:'R32 M7',slot:'1G v WC4',date:'Jul 2'},{id:80,round:'R32',label:'R32 M8',slot:'1H v 2F',date:'Jul 2'},
-  {id:81,round:'R32',label:'R32 M9',slot:'1I v WC5',date:'Jul 3'},{id:82,round:'R32',label:'R32 M10',slot:'1J v 2L',date:'Jul 3'},
-  {id:83,round:'R32',label:'R32 M11',slot:'1K v WC6',date:'Jul 4'},{id:84,round:'R32',label:'R32 M12',slot:'1L v 2J',date:'Jul 4'},
-  {id:85,round:'R32',label:'R32 M13',slot:'2A v WC7',date:'Jul 5'},{id:86,round:'R32',label:'R32 M14',slot:'2C v 2G',date:'Jul 5'},
-  {id:87,round:'R32',label:'R32 M15',slot:'2E v WC8',date:'Jul 6'},{id:88,round:'R32',label:'R32 M16',slot:'2I v 2K',date:'Jul 6'},
-  {id:89,round:'R16',label:'R16 M1',slot:'W73 v W74',date:'Jul 9'},{id:90,round:'R16',label:'R16 M2',slot:'W75 v W76',date:'Jul 9'},
-  {id:91,round:'R16',label:'R16 M3',slot:'W77 v W78',date:'Jul 10'},{id:92,round:'R16',label:'R16 M4',slot:'W79 v W80',date:'Jul 10'},
-  {id:93,round:'R16',label:'R16 M5',slot:'W81 v W82',date:'Jul 11'},{id:94,round:'R16',label:'R16 M6',slot:'W83 v W84',date:'Jul 11'},
-  {id:95,round:'R16',label:'R16 M7',slot:'W85 v W86',date:'Jul 12'},{id:96,round:'R16',label:'R16 M8',slot:'W87 v W88',date:'Jul 12'},
-  {id:97,round:'QF',label:'QF M1',slot:'W89 v W90',date:'Jul 16'},{id:98,round:'QF',label:'QF M2',slot:'W91 v W92',date:'Jul 16'},
-  {id:99,round:'QF',label:'QF M3',slot:'W93 v W94',date:'Jul 17'},{id:100,round:'QF',label:'QF M4',slot:'W95 v W96',date:'Jul 17'},
-  {id:101,round:'SF',label:'Semifinal 1',slot:'W97 v W98',date:'Jul 22'},{id:102,round:'SF',label:'Semifinal 2',slot:'W99 v W100',date:'Jul 22'},
-  {id:103,round:'3P',label:'3rd Place Playoff',slot:'L101 v L102',date:'Jul 25'},
-  {id:104,round:'F',label:'🏆 GRAND FINAL',slot:'W101 v W102',date:'Jul 26'},
+  {id:73,round:'R32',label:'R32 M1',slot:'2A v 2B',date:'Jun 29 · 12:30am IST'},
+  {id:74,round:'R32',label:'R32 M2',slot:'1E v 3rd',date:'Jun 29 · 2:00am IST'},
+  {id:75,round:'R32',label:'R32 M3',slot:'1F v 2C',date:'Jun 30 · 6:30am IST'},
+  {id:76,round:'R32',label:'R32 M4',slot:'1C v 2F',date:'Jun 29 · 10:30pm IST'},
+  {id:77,round:'R32',label:'R32 M5',slot:'1I v 3rd',date:'Jun 30 · 2:30am IST'},
+  {id:78,round:'R32',label:'R32 M6',slot:'2E v 2I',date:'Jun 30 · 10:30pm IST'},
+  {id:79,round:'R32',label:'R32 M7',slot:'1A v 3rd',date:'Jul 1 · 6:30am IST'},
+  {id:80,round:'R32',label:'R32 M8',slot:'1L v 3rd',date:'Jul 1 · 9:30pm IST'},
+  {id:81,round:'R32',label:'R32 M9',slot:'1D v 3rd',date:'Jul 2 · 5:30am IST'},
+  {id:82,round:'R32',label:'R32 M10',slot:'1G v 3rd',date:'Jul 2 · 1:30am IST'},
+  {id:83,round:'R32',label:'R32 M11',slot:'2K v 2L',date:'Jul 2 · 11:30pm IST'},
+  {id:84,round:'R32',label:'R32 M12',slot:'1H v 2J',date:'Jul 3 · 12:30am IST'},
+  {id:85,round:'R32',label:'R32 M13',slot:'1B v 3rd',date:'Jul 3 · 8:30am IST'},
+  {id:86,round:'R32',label:'R32 M14',slot:'1J v 2H',date:'Jul 4 · 3:30am IST'},
+  {id:87,round:'R32',label:'R32 M15',slot:'1K v 3rd',date:'Jul 4 · 7:00am IST'},
+  {id:88,round:'R32',label:'R32 M16',slot:'2D v 2G',date:'Jul 3 · 11:30pm IST'},
+  {id:89,round:'R16',label:'R16 M1',slot:'W74 v W77',date:'Jul 4 · 2:30am IST'},
+  {id:90,round:'R16',label:'R16 M2',slot:'W73 v W75',date:'Jul 4 · 10:30pm IST'},
+  {id:91,round:'R16',label:'R16 M3',slot:'W76 v W78',date:'Jul 5 · 1:30am IST'},
+  {id:92,round:'R16',label:'R16 M4',slot:'W79 v W80',date:'Jul 6 · 5:30am IST'},
+  {id:93,round:'R16',label:'R16 M5',slot:'W83 v W84',date:'Jul 7 · 12:30am IST'},
+  {id:94,round:'R16',label:'R16 M6',slot:'W81 v W82',date:'Jul 7 · 5:30am IST'},
+  {id:95,round:'R16',label:'R16 M7',slot:'W86 v W88',date:'Jul 7 · 9:30pm IST'},
+  {id:96,round:'R16',label:'R16 M8',slot:'W85 v W87',date:'Jul 8 · 1:30am IST'},
+  {id:97,round:'QF',label:'QF M1',slot:'W89 v W90',date:'Jul 10 · 1:30am IST'},
+  {id:98,round:'QF',label:'QF M2',slot:'W93 v W94',date:'Jul 10 · 12:30am IST'},
+  {id:99,round:'QF',label:'QF M3',slot:'W91 v W92',date:'Jul 12 · 2:30am IST'},
+  {id:100,round:'QF',label:'QF M4',slot:'W95 v W96',date:'Jul 12 · 6:30am IST'},
+  {id:101,round:'SF',label:'Semifinal 1',slot:'W97 v W98',date:'Jul 15 · 12:30am IST'},
+  {id:102,round:'SF',label:'Semifinal 2',slot:'W99 v W100',date:'Jul 16 · 12:30am IST'},
+  {id:103,round:'3P',label:'3rd Place Playoff',slot:'L101 v L102',date:'Jul 19 · 2:30am IST'},
+  {id:104,round:'F',label:'🏆 GRAND FINAL',slot:'W101 v W102',date:'Jul 19 · 12:30am IST'},
 ];
 const KO_ROUND_ORDER = ['R32','R16','QF','SF','3P','F'];
 
@@ -795,9 +863,7 @@ const CONSENSUS_DATA = {
   67:{t1:13,draw:25,t2:62},68:{t1:40,draw:29,t2:31},69:{t1:72,draw:23,t2:5},70:{t1:20,draw:27,t2:53},71:{t1:17,draw:26,t2:57},72:{t1:71,draw:23,t2:6},
 };
 
-// ══════════════════════════════════════════════════════
-// STORAGE
-// ══════════════════════════════════════════════════════
+// ── STORAGE ──
 function loadState(){try{const r=localStorage.getItem(STORAGE_KEY);return r?JSON.parse(r):{};}catch(e){return{};}}
 function saveState(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}catch(e){}}
 function getState(){return loadState();}
@@ -806,18 +872,11 @@ function sid(id){return String(id);}
 function hasSaved(s,id){const sid_str=sid(id);return Array.isArray(s.savedMatches)&&s.savedMatches.some(x=>sid(x)===sid_str);}
 function markSaved(s,id){if(!Array.isArray(s.savedMatches))s.savedMatches=[];const sid_str=sid(id);if(!s.savedMatches.some(x=>sid(x)===sid_str))s.savedMatches.push(parseInt(id));}
 
-// ══════════════════════════════════════════════════════
-// KO FIXTURES — global team assignments from Supabase
-// koFixtures[matchId] = { team1, team2, teams_locked }
-// ══════════════════════════════════════════════════════
-let koFixtures = {}; // populated by syncKOFixturesFromSupabase
-
+// ── KO FIXTURES ──
+let koFixtures = {};
 async function syncKOFixturesFromSupabase(force=false){
   try{
-    const {data,error} = await supabaseClient
-      .from('matches')
-      .select('id,team1,team2,teams_locked')
-      .gte('id',73).lte('id',104);
+    const {data,error} = await supabaseClient.from('matches').select('id,team1,team2,teams_locked').gte('id',73).lte('id',104);
     if(error){console.error('KO fixtures fetch error:',error.message);return;}
     koFixtures={};
     (data||[]).forEach(row=>{
@@ -828,47 +887,31 @@ async function syncKOFixturesFromSupabase(force=false){
   }catch(err){console.error('syncKOFixtures error:',err);}
 }
 
-// ══════════════════════════════════════════════════════
-// SYNC ACTUALS
-// ══════════════════════════════════════════════════════
+// ── SYNC ACTUALS ──
 let _actualsSynced = false;
 async function syncActualsFromSupabase(force=false) {
   if (_actualsSynced && !force) return;
   try {
-    const {data,error} = await supabaseClient
-      .from('matches')
-      .select('id,actual_score1,actual_score2,actual_pen1,actual_pen2,completed,team1,team2,teams_locked');
+    const {data,error} = await supabaseClient.from('matches').select('id,actual_score1,actual_score2,actual_pen1,actual_pen2,completed,team1,team2,teams_locked');
     if (error){console.error('Fetch actuals error:',error.message);return;}
     if (!data||!data.length) return;
     const s = getState();
     if (!s.actuals) s.actuals = {};
     koFixtures={};
     data.forEach(row => {
-      // Sync actuals
       if (row.actual_score1!=null || row.actual_score2!=null){
-        s.actuals[sid(row.id)] = {
-          g1: row.actual_score1 ?? 0,
-          g2: row.actual_score2 ?? 0,
-          pen1: row.actual_pen1 ?? null,
-          pen2: row.actual_pen2 ?? null,
-          completed: row.completed || false
-        };
+        s.actuals[sid(row.id)] = {g1:row.actual_score1??0,g2:row.actual_score2??0,pen1:row.actual_pen1??null,pen2:row.actual_pen2??null,completed:row.completed||false};
       }
-      // Sync KO fixtures
       if(row.id>=73&&row.id<=104&&(row.team1||row.team2||row.teams_locked)){
         koFixtures[sid(row.id)]={team1:row.team1||null,team2:row.team2||null,teams_locked:!!row.teams_locked};
       }
     });
     saveState(s);
     _actualsSynced = true;
-  } catch(err) {
-    console.error('syncActuals network error:',err);
-  }
+  } catch(err) {console.error('syncActuals network error:',err);}
 }
 
-// ══════════════════════════════════════════════════════
-// ONBOARDING
-// ══════════════════════════════════════════════════════
+// ── ONBOARDING ──
 let _pendingAction = null;
 function hasProfile(){const s=getState();return !!(s.profile&&s.profile.name&&s.profile.name.trim().length>0);}
 function requireProfile(fn){if(hasProfile()){fn();return;}_pendingAction=fn;showOnboardingModal();}
@@ -903,9 +946,7 @@ async function obSubmit(){
 document.getElementById('ob-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ob-email').focus();});
 document.getElementById('ob-email').addEventListener('keydown',e=>{if(e.key==='Enter')obSubmit();});
 
-// ══════════════════════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════════════════════
+// ── NAVIGATION ──
 function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
 function showHome(){showPage('page-home');}
 async function showGroups(){showPage('page-groups');await syncActualsFromSupabase();groupsInit();}
@@ -915,9 +956,7 @@ function goToGroups(){showGroups();}
 function goToKnockout(){showKnockout();}
 function scrollToSection(id){showPage('page-home');setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},100);}
 
-// ══════════════════════════════════════════════════════
-// SCORING ENGINE
-// ══════════════════════════════════════════════════════
+// ── SCORING ENGINE ──
 function calcMatchScore(pred,actual){
   const pG1=parseInt(pred.g1)||0,pG2=parseInt(pred.g2)||0;
   const aG1=parseInt(actual.g1)||0,aG2=parseInt(actual.g2)||0;
@@ -945,23 +984,12 @@ function calcMatchScore(pred,actual){
   return{pts:basePts,tier:baseTier,penPts,penTier,hasPen};
 }
 
-// ── KEY: for KO matches, check if user predicted the correct teams
-// Returns true if match is not a KO match, OR if koFixtures has no lock,
-// OR if the user's stored predicted teams match the real teams.
 function koTeamsMatch(mid, s){
   const kidStr = sid(mid);
   const fix = koFixtures[kidStr];
-  // Not a KO match or not yet locked by admin — no penalty
   if(!fix||!fix.teams_locked)return true;
-  // User's stored predicted teams for this KO slot
   const kd=(s.knockoutTeams||{})[kidStr]||{};
-  const userT1 = kd.t1||null;
-  const userT2 = kd.t2||null;
-  // Real teams from admin
-  const realT1 = fix.team1||null;
-  const realT2 = fix.team2||null;
-  // Both must match (order matters: same home/away pairing)
-  return userT1===realT1 && userT2===realT2;
+  return kd.t1===fix.team1 && kd.t2===fix.team2;
 }
 
 function computeYourStats(s){
@@ -972,11 +1000,7 @@ function computeYourStats(s){
     const pred=preds[sid(mid)];
     if(!pred||!pred.saved)return;
     matchesScored++;
-    // For KO matches: if admin has set real teams and user predicted wrong teams → 0 pts
-    if(KO_MATCH_IDS.has(parseInt(mid))&&!koTeamsMatch(parseInt(mid),s)){
-      miss++;
-      return;
-    }
+    if(KO_MATCH_IDS.has(parseInt(mid))&&!koTeamsMatch(parseInt(mid),s)){miss++;return;}
     const{pts,tier,penPts,penTier,hasPen}=calcMatchScore(pred,actual);
     const multiplier=pred.doubled?2:1;
     const finalPts=(pts+penPts)*multiplier;
@@ -988,9 +1012,7 @@ function computeYourStats(s){
   return{exact,margin,result,miss,doubleBonus,total,matchesScored};
 }
 
-// ══════════════════════════════════════════════════════
-// UTILITIES
-// ══════════════════════════════════════════════════════
+// ── UTILITIES ──
 function flagShield(name,size=36){
   if(!name||name==='TBD')return`<div class="flag-shield" style="width:${size}px;height:${size}px;background:#1e293b;color:#94a3b8">TBD</div>`;
   const c=TEAM_COLORS[name]||{bg:'#334155',text:'#fff'};
@@ -1007,19 +1029,17 @@ function teamDropdownHTML(selectId, selectedVal, emptyLabel='— Select Team —
   return`<select class="admin-team-select" id="${selectId}"><option value="">${emptyLabel}</option>${opts}</select>`;
 }
 
-// ══════════════════════════════════════════════════════
-// HOMEPAGE SETUP
-// ══════════════════════════════════════════════════════
+// ── HOMEPAGE SETUP ──
 (function setupHome(){
   const OPENERS=[
     {group:'A',date:'Jun 11',t1:'Mexico',t2:'South Africa',c1:'#006847',c2:'#007A4D'},
     {group:'A',date:'Jun 11',t1:'South Korea',t2:'Czechia',c1:'#C60C30',c2:'#D7141A'},
-    {group:'B',date:'Jun 11',t1:'Canada',t2:'Bosnia',c1:'#FF0000',c2:'#002F6C'},
-    {group:'B',date:'Jun 12',t1:'Qatar',t2:'Switzerland',c1:'#8B0000',c2:'#FF0000'},
-    {group:'C',date:'Jun 12',t1:'Brazil',t2:'Morocco',c1:'#009C3B',c2:'#C1272D'},
-    {group:'C',date:'Jun 12',t1:'Haiti',t2:'Scotland',c1:'#00209F',c2:'#003F87'},
+    {group:'B',date:'Jun 12',t1:'Canada',t2:'Bosnia',c1:'#FF0000',c2:'#002F6C'},
+    {group:'B',date:'Jun 13',t1:'Qatar',t2:'Switzerland',c1:'#8B0000',c2:'#FF0000'},
+    {group:'C',date:'Jun 13',t1:'Brazil',t2:'Morocco',c1:'#009C3B',c2:'#C1272D'},
+    {group:'C',date:'Jun 13',t1:'Haiti',t2:'Scotland',c1:'#00209F',c2:'#003F87'},
     {group:'D',date:'Jun 12',t1:'United States',t2:'Paraguay',c1:'#002868',c2:'#D52B1E'},
-    {group:'D',date:'Jun 13',t1:'Australia',t2:'Türkiye',c1:'#00843D',c2:'#E30A17'},
+    {group:'D',date:'Jun 15',t1:'Australia',t2:'Türkiye',c1:'#00843D',c2:'#E30A17'},
   ];
   document.getElementById('match-ticker').innerHTML=OPENERS.map(m=>`
     <div class="ticker-card" onclick="goToGroups()">
@@ -1051,15 +1071,35 @@ function groupsInit(){const s=getState();if(!s.gPill)s.gPill='A';gRenderPills(s)
 
 function gRenderPills(s){
   const groups=['A','B','C','D','E','F','G','H','I','J','K','L'];
+  const currentGroup=s.gPill||'A';
   document.getElementById('sub-pills').innerHTML=groups.map(g=>{
     const saved=GROUP_MATCHES.filter(m=>m.group===g&&hasSaved(s,m.id)).length;
-    return`<button class="pill${(s.gPill||'A')===g?' active':''}" onclick="gSelectGroup('${g}')">Group ${g} <span style="font-size:9px">${saved}/6</span></button>`;
+    return`<button class="pill${currentGroup===g?' active':''}" onclick="gSelectGroup('${g}')">Group ${g} <span style="font-size:9px">${saved}/6</span></button>`;
   }).join('');
+  // Save button: only visible on Group L
   const saveBtn=document.getElementById('btn-save-group');
-  if(saveBtn){saveBtn.style.display=(s.gPill||'A')==='L'?'':'none';saveBtn.onclick=saveAllGroups;}
+  if(saveBtn){
+    saveBtn.style.display=currentGroup==='L'?'flex':'none';
+    saveBtn.onclick=saveAllGroups;
+  }
+  // Hint for groups A-K
+  let hint=document.getElementById('save-hint-msg');
+  if(currentGroup!=='L'){
+    if(!hint){
+      hint=document.createElement('span');
+      hint.id='save-hint-msg';
+      hint.style.cssText='font-size:11px;color:var(--text-muted);display:flex;align-items:center;';
+      hint.textContent='💾 Save button is on Group L';
+      document.querySelector('.action-row').appendChild(hint);
+    }
+    hint.style.display='flex';
+  } else {
+    if(hint) hint.style.display='none';
+  }
 }
 
 function gSelectGroup(g){const s=getState();s.gPill=g;saveState(s);gRenderPills(s);gRenderTab(s);}
+
 function gRenderTab(s){
   const g=s.gPill||'A';const matches=GROUP_MATCHES.filter(m=>m.group===g);
   document.getElementById('groups-content').innerHTML=`
@@ -1103,8 +1143,10 @@ function gRenderCard(m,s){
     ptsPrev=`<span class="pts-preview ${cls}">${fp>0?'+'+fp+' pts':'0 pts'}</span>`;
   }
   const completedLabel=isCompleted?`<span class="completed-label">🔒 LOCKED</span>`:'';
+  // saved badge: only show if actually saved in state (not just on score input)
+  const isSaved=!!sc.saved;
   return`
-  <div class="match-card${sc.doubled?' doubled':''}${sc.saved?' saved':''}${isCompleted?' completed-match':''}" id="card-${mid}">
+  <div class="match-card${sc.doubled?' doubled':''}${isSaved?' saved':''}${isCompleted?' completed-match':''}" id="card-${mid}">
     <div class="card-top-border"><div class="t1c" style="background:${c1}"></div><div class="t2c" style="background:${c2}"></div></div>
     <div class="card-body">
       <div class="card-header">
@@ -1129,8 +1171,8 @@ function gRenderCard(m,s){
       <div class="card-actions">
         <button class="btn-double${sc.doubled?' active':''}" id="dbl-btn-${mid}"
           ${isCompleted?'disabled':''} onclick="gToggleDoubleGated(${mid})">✕2 Double</button>
-        ${sc.doubled?'<span class="double-badge">✕2 DOUBLED</span>':''}
-        <div class="saved-badge${sc.saved?' visible':''}" id="saved-badge-${mid}">✅ Saved</div>
+        ${sc.doubled?`<span class="double-badge" id="dbl-badge-${mid}">✕2 DOUBLED</span>`:''}
+        <div class="saved-badge${isSaved?' visible':''}" id="saved-badge-${mid}">✅ Saved</div>
         ${ptsPrev}
       </div>
     </div>
@@ -1157,13 +1199,19 @@ function gOnScore(mid){
   const g2=Math.max(0,parseInt(document.getElementById('s2-'+mid).value)||0);
   document.getElementById('s1-'+mid).value=g1;document.getElementById('s2-'+mid).value=g2;
   if(!s.scores)s.scores={};if(!s.scores[sid(mid)])s.scores[sid(mid)]={g1:0,g2:0,saved:false,doubled:false};
-  s.scores[sid(mid)].g1=g1;s.scores[sid(mid)].g2=g2;s.scores[sid(mid)].saved=true;
-  markSaved(s,mid);computeGroupStandings(s);computeWildcards(s);saveState(s);
+  s.scores[sid(mid)].g1=g1;s.scores[sid(mid)].g2=g2;
+  // *** KEY FIX: do NOT mark saved=true here. Only mark pending. ***
+  // We still persist locally so scores survive refresh, but saved badge stays off
+  s.scores[sid(mid)].saved=false; // reset to unsaved on each edit
+  saveState(s);
+  // Update standings live (using in-memory computed value, not marking as "saved" for badge)
+  computeGroupStandings(s);computeWildcards(s);saveState(s);
   syncPredictionToSupabase(mid,g1,g2,(s.scores[sid(mid)]||{}).doubled,null,null);
   const grp=GROUP_MATCHES.find(m=>m.id===mid)?.group;
   if(grp){const sEl=document.getElementById('standings-'+grp);if(sEl)sEl.innerHTML=gBuildStandings(grp,s);}
-  const badge=document.getElementById('saved-badge-'+mid);if(badge)badge.classList.add('visible');
-  const card=document.getElementById('card-'+mid);if(card)card.classList.add('saved');
+  // Do NOT show saved badge — score was changed, needs Save button
+  const badge=document.getElementById('saved-badge-'+mid);if(badge)badge.classList.remove('visible');
+  const card=document.getElementById('card-'+mid);if(card)card.classList.remove('saved');
   gUpdateBar(s);
 }
 
@@ -1172,46 +1220,49 @@ function gToggleDouble(mid){
   if(actual?.completed){showToast('🔒 Double locked for completed matches.','warn');return;}
   if(!s.scores)s.scores={};if(!s.scores[sid(mid)])s.scores[sid(mid)]={g1:0,g2:0,saved:false,doubled:false};
   const used=s.doublesUsed||0;
+  const card=document.getElementById('card-'+mid);
+  const dblBtn=document.getElementById('dbl-btn-'+mid);
   if(!s.scores[sid(mid)].doubled){
     if(used>=MAX_DOUBLES){showToast('No Doubles left!','warn');return;}
     s.doublesUsed=used+1;s.scores[sid(mid)].doubled=true;
-    document.getElementById('card-'+mid).classList.add('doubled');document.getElementById('dbl-btn-'+mid).classList.add('active');showToast('✕2 Double applied!');
+    if(card)card.classList.add('doubled');if(dblBtn)dblBtn.classList.add('active');
+    // Add badge if not present
+    if(!document.getElementById('dbl-badge-'+mid)){
+      const badge=document.createElement('span');badge.className='double-badge';badge.id='dbl-badge-'+mid;badge.textContent='✕2 DOUBLED';
+      if(dblBtn)dblBtn.insertAdjacentElement('afterend',badge);
+    }
+    showToast('✕2 Double applied!');
   }else{
     s.doublesUsed=Math.max(0,used-1);s.scores[sid(mid)].doubled=false;
-    document.getElementById('card-'+mid).classList.remove('doubled');document.getElementById('dbl-btn-'+mid).classList.remove('active');showToast('Double removed.','warn');
+    if(card)card.classList.remove('doubled');if(dblBtn)dblBtn.classList.remove('active');
+    // Remove badge
+    const badge=document.getElementById('dbl-badge-'+mid);if(badge)badge.remove();
+    showToast('Double removed.','warn');
   }
   saveState(s);document.getElementById('token-count').textContent=MAX_DOUBLES-(s.doublesUsed||0);
 }
 
-function saveCurrentGroup(){
-  const s=getState();const g=s.gPill||'A';
-  GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
-    const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed)return;
-    const s1=document.getElementById('s1-'+m.id),s2=document.getElementById('s2-'+m.id);if(!s1||!s2)return;
-    if(!s.scores)s.scores={};if(!s.scores[sid(m.id)])s.scores[sid(m.id)]={g1:0,g2:0,saved:false,doubled:false};
-    s.scores[sid(m.id)].g1=parseInt(s1.value)||0;s.scores[sid(m.id)].g2=parseInt(s2.value)||0;s.scores[sid(m.id)].saved=true;markSaved(s,m.id);
-  });
-  computeGroupStandings(s);computeWildcards(s);saveState(s);
-  GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
-    const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed)return;
-    const sc=s.scores[sid(m.id)];if(sc)syncPredictionToSupabase(m.id,sc.g1,sc.g2,sc.doubled,null,null);
-  });
-  gRenderPills(s);gRenderTab(s);gUpdateBar(s);showToast(`✅ All results saved!`);
-}
-
 function saveAllGroups(){
   const s=getState();
+  // Save current visible group L inputs
   GROUP_MATCHES.filter(m=>m.group==='L').forEach(m=>{
     const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed)return;
     const s1=document.getElementById('s1-'+m.id);const s2=document.getElementById('s2-'+m.id);if(!s1||!s2)return;
     if(!s.scores)s.scores={};if(!s.scores[sid(m.id)])s.scores[sid(m.id)]={g1:0,g2:0,saved:false,doubled:false};
-    s.scores[sid(m.id)].g1=parseInt(s1.value)||0;s.scores[sid(m.id)].g2=parseInt(s2.value)||0;s.scores[sid(m.id)].saved=true;markSaved(s,m.id);
+    s.scores[sid(m.id)].g1=parseInt(s1.value)||0;s.scores[sid(m.id)].g2=parseInt(s2.value)||0;
+  });
+  // Mark ALL groups as saved
+  GROUP_MATCHES.forEach(m=>{
+    const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed)return;
+    if(!s.scores||!s.scores[sid(m.id)])return;
+    s.scores[sid(m.id)].saved=true;
+    markSaved(s,m.id);
   });
   computeGroupStandings(s);computeWildcards(s);saveState(s);
   let count=0;
   GROUP_MATCHES.forEach(m=>{
     const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed)return;
-    const sc=s.scores[sid(m.id)];if(!sc||!sc.saved)return;
+    const sc=s.scores[sid(m.id)];if(!sc)return;
     syncPredictionToSupabase(m.id,sc.g1,sc.g2,sc.doubled,null,null);count++;
   });
   gRenderPills(s);gRenderTab(s);gUpdateBar(s);showToast(`✅ All ${count} group predictions saved!`);
@@ -1223,11 +1274,10 @@ function _randomizeGroup(){
   GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
     const actual=(s.actuals||{})[sid(m.id)];if(actual?.completed){skipped++;return;}
     if(!s.scores)s.scores={};
-    s.scores[sid(m.id)]={g1:Math.floor(Math.random()*4),g2:Math.floor(Math.random()*3),saved:true,doubled:s.scores[sid(m.id)]?.doubled||false};
-    markSaved(s,m.id);
+    s.scores[sid(m.id)]={g1:Math.floor(Math.random()*4),g2:Math.floor(Math.random()*3),saved:false,doubled:s.scores[sid(m.id)]?.doubled||false};
   });
   computeGroupStandings(s);computeWildcards(s);saveState(s);gRenderPills(s);gRenderTab(s);gUpdateBar(s);
-  showToast(skipped>0?`🎲 Group ${g} randomized! (${skipped} locked match${skipped>1?'es':''} skipped)`:`🎲 Group ${g} randomized!`);
+  showToast(skipped>0?`🎲 Group ${g} randomized! Hit Save on Group L to confirm. (${skipped} locked skipped)`:`🎲 Group ${g} randomized! Hit Save on Group L to confirm.`,'warn');
 }
 
 function resetGroup(){
@@ -1247,8 +1297,9 @@ function computeGroupStandings(s){
     const teams={};
     GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
       [m.t1,m.t2].forEach(t=>{if(!teams[t])teams[t]={name:t,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};});
-      const sc=(s.scores||{})[sid(m.id)];if(!sc||!sc.saved)return;
+      const sc=(s.scores||{})[sid(m.id)];if(!sc)return;
       const g1=parseInt(sc.g1)||0,g2=parseInt(sc.g2)||0;
+      if(g1===0&&g2===0&&!sc.saved)return;
       teams[m.t1].p++;teams[m.t2].p++;teams[m.t1].gf+=g1;teams[m.t1].ga+=g2;teams[m.t2].gf+=g2;teams[m.t2].ga+=g1;
       if(g1>g2){teams[m.t1].w++;teams[m.t1].pts+=3;teams[m.t2].l++;}
       else if(g1<g2){teams[m.t2].w++;teams[m.t2].pts+=3;teams[m.t1].l++;}
@@ -1295,14 +1346,9 @@ function koRenderPills(s){
 
 function koSelectRound(r){const s=getState();s.koPill=r;saveState(s);koRenderPills(s);koRenderTab(s);}
 
-// Resolves the display teams for a KO match:
-// If admin has locked teams in Supabase → use those (global)
-// Otherwise → use user's bracket-derived teams
 function koResolveTeams(mid, s){
   const fix=koFixtures[sid(mid)];
-  if(fix&&fix.teams_locked&&fix.team1&&fix.team2){
-    return{t1:fix.team1,t2:fix.team2,locked:true};
-  }
+  if(fix&&fix.teams_locked&&fix.team1&&fix.team2){return{t1:fix.team1,t2:fix.team2,locked:true};}
   const kd=(s.knockoutTeams||{})[sid(mid)]||{};
   return{t1:kd.t1||null,t2:kd.t2||null,locked:false};
 }
@@ -1318,16 +1364,12 @@ function koRenderTab(s){
   if(s.wildcards&&s.wildcards.length){
     wcHTML=`<div class="wildcard-panel"><div class="wildcard-title">🎫 Wildcard Qualifiers — Best 3rd Place Teams</div><div class="wildcard-grid">${s.wildcards.map((wc,i)=>`<div class="wildcard-chip qualified"><span class="wc-pos">#${i+1}</span>${flagShield(wc.team,28)}<div><div class="wc-team">${wc.team}</div><div class="wc-pts">Grp ${wc.group} · ${wc.pts}pts</div></div></div>`).join('')}</div></div>`;
   }
-
-  // Check if any match in this round has admin-locked teams
   const hasLockedTeams=matches.some(m=>koFixtures[sid(m.id)]?.teams_locked);
   const noticeHTML=hasLockedTeams?`<div class="ko-tba-notice">🔒 <strong>Real teams have been set by admin</strong> for some matches in this round. Predictions for wrong teams score 0 points.</div>`:'';
-
   const cardsHTML=matches.map(m=>{
     const resolved=koResolveTeams(m.id,s);
     return koRenderCard(m,resolved.t1,resolved.t2,resolved.locked,s);
   }).join('');
-
   document.getElementById('knockout-content').innerHTML=`${wcHTML}${noticeHTML}<div class="ko-section"><div class="ko-section-title">${labels[round]||round}</div><div class="ko-grid">${cardsHTML}</div></div>`;
   matches.forEach(m=>{
     const sc=(s.scores||{})[sid(m.id)];
@@ -1346,13 +1388,9 @@ function koRenderCard(m,t1,t2,isGloballyLocked,s){
   const isDraw=g1===g2&&sc.saved;
   const isFinal=mid===104,isSF=m.round==='SF';
   const actual=(s.actuals||{})[sid(mid)];const isCompleted=actual?.completed||false;
-
-  // If admin locked teams, check if user predicted the right teams — show warning if not
   const teamsWrong = isGloballyLocked && sc.saved && !koTeamsMatch(mid, s);
-
   const cardCls=`match-card${sc.doubled?' doubled':''}${sc.saved?' saved':''}${isFinal?' final-match':''}${isSF?' semifinal-match':''}${isCompleted?' completed-match':''}${isGloballyLocked?' teams-locked-card':''}`;
   const penWinner=isDraw&&sc.saved?(()=>{const p1=parseInt(sc.pen1)||0,p2=parseInt(sc.pen2)||0;return p1>p2?`🏅 ${teamA} advance`:p2>p1?`🏅 ${teamB} advance`:'';})():'';
-
   let ptsPrev='';
   if(actual&&actual.completed&&sc.saved){
     if(teamsWrong){
@@ -1365,20 +1403,15 @@ function koRenderCard(m,t1,t2,isGloballyLocked,s){
       ptsPrev=`<span class="pts-preview ${cls}">${total>0?'+'+total+' pts'+penLabel:'0 pts'}</span>`;
     }
   }
-
   const completedLabel=isCompleted?`<span class="completed-label">🔒 LOCKED</span>`:'';
   const lockedLabel=isGloballyLocked?`<span class="teams-locked-label">🌍 Official</span>`:'';
-
   let actualPenHTML='';
   if(actual&&actual.completed&&actual.pen1!=null&&actual.pen2!=null){
     const ap1=actual.pen1,ap2=actual.pen2;
     const penWin=ap1>ap2?teamA:ap2>ap1?teamB:'';
     actualPenHTML=`<div style="margin-top:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:6px;padding:5px 10px;font-size:10px;color:var(--accent-amber);font-weight:700;">⚡ Official Penalties: ${ap1}–${ap2}${penWin?' · '+penWin+' advance':''}</div>`;
   }
-
-  // Warning if user predicted wrong teams for a locked match
   const wrongTeamsWarning = teamsWrong ? `<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--accent-red);margin-top:6px;">⚠️ You predicted different teams for this slot — this prediction scores 0 pts. Re-predict below.</div>` : '';
-
   return`
   <div class="${cardCls}" id="card-${mid}">
     <div class="card-top-border"><div class="t1c" style="background:${c1}"></div><div class="t2c" style="background:${c2}"></div></div>
@@ -1408,7 +1441,7 @@ function koRenderCard(m,t1,t2,isGloballyLocked,s){
       <div class="card-actions">
         <button class="btn-double${sc.doubled?' active':''}" id="dbl-btn-${mid}"
           ${isCompleted?'disabled':''} onclick="koToggleDoubleGated(${mid})">✕2 Double</button>
-        ${sc.doubled?'<span class="double-badge">✕2 DOUBLED</span>':''}
+        ${sc.doubled?`<span class="double-badge" id="dbl-badge-${mid}">✕2 DOUBLED</span>`:''}
         <div class="saved-badge${sc.saved?' visible':''}" id="saved-badge-${mid}">✅ Saved</div>
         ${ptsPrev}
       </div>
@@ -1426,19 +1459,20 @@ function koOnScore(mid){
   const g2=Math.max(0,parseInt(document.getElementById('s2-'+mid).value)||0);
   document.getElementById('s1-'+mid).value=g1;document.getElementById('s2-'+mid).value=g2;
   if(!s.scores)s.scores={};if(!s.scores[sid(mid)])s.scores[sid(mid)]={g1:0,g2:0,pen1:0,pen2:0,saved:false,doubled:false};
-  s.scores[sid(mid)].g1=g1;s.scores[sid(mid)].g2=g2;s.scores[sid(mid)].saved=true;markSaved(s,mid);
-
-  // Store which teams the user was predicting for (resolved at time of save)
+  s.scores[sid(mid)].g1=g1;s.scores[sid(mid)].g2=g2;
+  // *** KEY FIX: reset saved to false when score changes ***
+  s.scores[sid(mid)].saved=false;
+  // Remove saved badge
+  const badge=document.getElementById('saved-badge-'+mid);if(badge)badge.classList.remove('visible');
+  const card=document.getElementById('card-'+mid);if(card)card.classList.remove('saved');
   const resolved=koResolveTeams(mid,s);
   if(!s.knockoutTeams)s.knockoutTeams={};
   if(!s.knockoutTeams[sid(mid)])s.knockoutTeams[sid(mid)]={};
   if(resolved.t1)s.knockoutTeams[sid(mid)].t1=resolved.t1;
   if(resolved.t2)s.knockoutTeams[sid(mid)].t2=resolved.t2;
-
   const pen=document.getElementById('pen-'+mid);
   if(pen){if(g1===g2){pen.style.display='block';pen.classList.add('visible');}else{pen.style.display='none';pen.classList.remove('visible');}}
   koPopulateTeams(s);saveState(s);koRenderBracketSVG(s);koUpdateBar(s);koCheckNextRound(s);
-  const badge=document.getElementById('saved-badge-'+mid);if(badge)badge.classList.add('visible');
   const sc=s.scores[sid(mid)]||{};
   syncPredictionToSupabase(mid,g1,g2,sc.doubled||false,sc.pen1||null,sc.pen2||null);
 }
@@ -1462,13 +1496,22 @@ function koToggleDouble(mid){
   if(actual?.completed){showToast('🔒 Double locked for completed matches.','warn');return;}
   if(!s.scores)s.scores={};if(!s.scores[sid(mid)])s.scores[sid(mid)]={g1:0,g2:0,pen1:0,pen2:0,saved:false,doubled:false};
   const used=s.doublesUsed||0;
+  const card=document.getElementById('card-'+mid);
+  const dblBtn=document.getElementById('dbl-btn-'+mid);
   if(!s.scores[sid(mid)].doubled){
     if(used>=MAX_DOUBLES){showToast('No Doubles left!','warn');return;}
     s.doublesUsed=used+1;s.scores[sid(mid)].doubled=true;
-    document.getElementById('card-'+mid).classList.add('doubled');document.getElementById('dbl-btn-'+mid).classList.add('active');showToast('✕2 Double applied!');
+    if(card)card.classList.add('doubled');if(dblBtn)dblBtn.classList.add('active');
+    if(!document.getElementById('dbl-badge-'+mid)){
+      const badge=document.createElement('span');badge.className='double-badge';badge.id='dbl-badge-'+mid;badge.textContent='✕2 DOUBLED';
+      if(dblBtn)dblBtn.insertAdjacentElement('afterend',badge);
+    }
+    showToast('✕2 Double applied!');
   }else{
     s.doublesUsed=Math.max(0,used-1);s.scores[sid(mid)].doubled=false;
-    document.getElementById('card-'+mid).classList.remove('doubled');document.getElementById('dbl-btn-'+mid).classList.remove('active');showToast('Double removed.','warn');
+    if(card)card.classList.remove('doubled');if(dblBtn)dblBtn.classList.remove('active');
+    const badge=document.getElementById('dbl-badge-'+mid);if(badge)badge.remove();
+    showToast('Double removed.','warn');
   }
   saveState(s);document.getElementById('ko-token-count').textContent=MAX_DOUBLES-(s.doublesUsed||0);
 }
@@ -1481,7 +1524,6 @@ function saveCurrentRound(){
     const s1=document.getElementById('s1-'+m.id),s2=document.getElementById('s2-'+m.id);if(!s1||!s2)return;
     if(!s.scores)s.scores={};if(!s.scores[sid(m.id)])s.scores[sid(m.id)]={g1:0,g2:0,pen1:0,pen2:0,saved:false,doubled:false};
     s.scores[sid(m.id)].g1=parseInt(s1.value)||0;s.scores[sid(m.id)].g2=parseInt(s2.value)||0;s.scores[sid(m.id)].saved=true;
-    // Save which teams user predicted for
     if(!s.knockoutTeams)s.knockoutTeams={};
     if(!s.knockoutTeams[sid(m.id)])s.knockoutTeams[sid(m.id)]={};
     s.knockoutTeams[sid(m.id)].t1=resolved.t1;s.knockoutTeams[sid(m.id)].t2=resolved.t2;
@@ -1530,29 +1572,21 @@ function goNextRound(){
   s.koPill=KO_ROUND_ORDER[idx+1];saveState(s);koRenderPills(s);koRenderTab(s);showToast('Moving to next round!');
 }
 
-// koPopulateTeams: derives bracket from user's group predictions
-// Only fills in slots NOT already locked by admin
 function koPopulateTeams(s){
   if(!s.knockoutTeams)s.knockoutTeams={};
   const gw=s.groupWinners||{},wc=s.wildcards||[];
   const g1=g=>(gw[g]&&gw[g][0])||null;const g2=g=>(gw[g]&&gw[g][1])||null;const gc=i=>(wc[i]&&wc[i].team)||null;
-
-  // Only populate R32 slots from group stage if admin hasn't locked them
   const r32map={73:{t1:g1('A'),t2:gc(0)},74:{t1:g1('B'),t2:g2('D')},75:{t1:g1('C'),t2:gc(1)},76:{t1:g1('D'),t2:g2('B')},
     77:{t1:g1('E'),t2:gc(2)},78:{t1:g1('F'),t2:g2('H')},79:{t1:g1('G'),t2:gc(3)},80:{t1:g1('H'),t2:g2('F')},
     81:{t1:g1('I'),t2:gc(4)},82:{t1:g1('J'),t2:g2('L')},83:{t1:g1('K'),t2:gc(5)},84:{t1:g1('L'),t2:g2('J')},
     85:{t1:g2('A'),t2:gc(6)},86:{t1:g2('C'),t2:g2('G')},87:{t1:g2('E'),t2:gc(7)},88:{t1:g2('I'),t2:g2('K')}};
   Object.entries(r32map).forEach(([id,teams])=>{
-    const fix=koFixtures[sid(id)];
-    if(fix&&fix.teams_locked)return; // admin owns this slot
+    const fix=koFixtures[sid(id)];if(fix&&fix.teams_locked)return;
     const kid=sid(id);if(!s.knockoutTeams[kid])s.knockoutTeams[kid]={};
     s.knockoutTeams[kid].t1=teams.t1;s.knockoutTeams[kid].t2=teams.t2;
   });
-
-  // For subsequent rounds, use koGetWinner which respects admin-locked teams for display
   function cw(from,to,slot){
-    const fix=koFixtures[sid(to)];
-    if(fix&&fix.teams_locked)return; // admin owns this slot
+    const fix=koFixtures[sid(to)];if(fix&&fix.teams_locked)return;
     const w=koGetWinner(from,s);
     const kid=sid(to);if(!s.knockoutTeams[kid])s.knockoutTeams[kid]={};
     s.knockoutTeams[kid][slot]=w;
@@ -1578,7 +1612,6 @@ function koPopulateTeams(s){
 }
 
 function koGetWinner(mid,s){
-  // Prefer admin-locked teams for display cascade
   const fix=koFixtures[sid(mid)];
   const kd=fix&&fix.teams_locked?{t1:fix.team1,t2:fix.team2}:(s.knockoutTeams||{})[sid(mid)];
   if(!kd)return null;
@@ -1663,88 +1696,26 @@ function lbRenderTable(entries){
     if(lbFilter==='doubled'&&u.doubled===0)return false;
     return true;
   });
-
-  // Show only Top 10
   let displayEntries = filtered.slice(0,10);
-
-  // Find current user
   const currentUser = filtered.find(u => u.you);
-
-  // If current user is outside Top 10, append them below
-  if(
-    currentUser &&
-    !displayEntries.some(u => u.userId === currentUser.userId)
-  ){
-    displayEntries.push({
-      separator:true
-    });
-
+  if(currentUser && !displayEntries.some(u => u.userId === currentUser.userId)){
+    displayEntries.push({separator:true});
     displayEntries.push(currentUser);
   }
-
-  const rankCls=r=>
-    r===1?'rank-1':
-    r===2?'rank-2':
-    r===3?'rank-3':
-    'rank-other';
-
-  const tIcon=t=>
-    t==='up'
-      ?'<span class="trend-up">▲</span>'
-      :t==='down'
-      ?'<span class="trend-down">▼</span>'
-      :'<span class="trend-flat">—</span>';
-
-  document.getElementById('lb-table').innerHTML=
-    displayEntries.map(u=>{
-
-      if(u.separator){
-        return `
-          <div style="
-            padding:12px;
-            text-align:center;
-            color:var(--text-muted);
-            font-size:11px;
-            border-top:1px solid var(--border-subtle);
-            border-bottom:1px solid var(--border-subtle);
-            background:var(--bg-card3);
-          ">
-            Your Position
-          </div>
-        `;
-      }
-
-      return `
-        <div class="lb-row${u.you?' you-row':''}">
-          <div class="lb-rank-badge ${rankCls(u.rank)}">${u.rank}</div>
-
-          <div class="lb-avatar" style="background:rgba(56,189,248,0.06)">
-            ${u.emoji}
-          </div>
-
-          <div class="lb-info">
-            <div class="lb-handle${u.you?' you':''}">
-              ${u.handle}
-              ${u.you?'<span class="lb-badge-you">YOU</span>':''}
-              ${tIcon(u.trend)}
-            </div>
-
-            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">
-              🥇${u.exact} exact ·
-              🥈${u.margin} margin ·
-              🥉${u.result} result ·
-              ✕2 ${u.doubled}
-            </div>
-          </div>
-
-          <div class="lb-right">
-            <div class="lb-xp">${u.pts}</div>
-            <div class="lb-xp-label">pts</div>
-          </div>
-        </div>
-      `;
-    }).join('')
-    || '<div style="text-align:center;padding:32px;color:var(--text-muted)">No entries match filter.</div>';
+  const rankCls=r=>r===1?'rank-1':r===2?'rank-2':r===3?'rank-3':'rank-other';
+  const tIcon=t=>t==='up'?'<span class="trend-up">▲</span>':t==='down'?'<span class="trend-down">▼</span>':'<span class="trend-flat">—</span>';
+  document.getElementById('lb-table').innerHTML=displayEntries.map(u=>{
+    if(u.separator){return`<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:11px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);background:var(--bg-card3);">Your Position</div>`;}
+    return`<div class="lb-row${u.you?' you-row':''}">
+      <div class="lb-rank-badge ${rankCls(u.rank)}">${u.rank}</div>
+      <div class="lb-avatar" style="background:rgba(56,189,248,0.06)">${u.emoji}</div>
+      <div class="lb-info">
+        <div class="lb-handle${u.you?' you':''}">${u.handle}${u.you?'<span class="lb-badge-you">YOU</span>':''}${tIcon(u.trend)}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">🥇${u.exact} exact · 🥈${u.margin} margin · 🥉${u.result} result · ✕2 ${u.doubled}</div>
+      </div>
+      <div class="lb-right"><div class="lb-xp">${u.pts}</div><div class="lb-xp-label">pts</div></div>
+    </div>`;
+  }).join('')||'<div style="text-align:center;padding:32px;color:var(--text-muted)">No entries match filter.</div>';
 }
 
 function lbRenderChamp(s){
@@ -1779,10 +1750,9 @@ function lbShareToTwitter(){
 }
 
 // ══════════════════════════════════════════════════════
-// ADMIN PANEL — tabs: Groups | Set KO Teams | Enter KO Results
+// ADMIN PANEL
 // ══════════════════════════════════════════════════════
 let adminRound='Groups';
-let adminKOTab='set-teams'; // 'set-teams' or 'enter-results'
 
 function openAdminModal(){
   document.getElementById('admin-modal').classList.add('open');
@@ -1797,14 +1767,8 @@ function adminLogin(){
 }
 
 function adminRenderTabs(){
-  const mainTabs=[
-    {id:'Groups',label:'⚽ Group Stage'},
-    {id:'KO-SetTeams',label:'🔧 Set KO Teams'},
-    {id:'KO-Results',label:'📋 KO Results'},
-  ];
-  document.getElementById('admin-tabs').innerHTML=mainTabs.map(t=>`
-    <button class="admin-tab${adminRound===t.id?' active':''}" onclick="adminSelectTab('${t.id}')">${t.label}</button>
-  `).join('');
+  const mainTabs=[{id:'Groups',label:'⚽ Group Stage'},{id:'KO-SetTeams',label:'🔧 Set KO Teams'},{id:'KO-Results',label:'📋 KO Results'}];
+  document.getElementById('admin-tabs').innerHTML=mainTabs.map(t=>`<button class="admin-tab${adminRound===t.id?' active':''}" onclick="adminSelectTab('${t.id}')">${t.label}</button>`).join('');
   adminRenderMatches();
 }
 
@@ -1812,9 +1776,7 @@ function adminSelectTab(r){adminRound=r;adminRenderTabs();}
 
 function adminRenderMatches(){
   const s=getState();const actuals=s.actuals||{};let html='';
-
   if(adminRound==='Groups'){
-    // Group stage — same as before
     ['A','B','C','D','E','F','G','H','I','J','K','L'].forEach(g=>{
       html+=`<div class="admin-section-head">Group ${g}</div>`;
       GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
@@ -1830,16 +1792,9 @@ function adminRenderMatches(){
         </div>`;
       });
     });
-    document.getElementById('admin-action-btns').innerHTML=`
-      <button class="btn-save" onclick="adminSaveResults()" style="flex:1;justify-content:center">💾 Save Results & Recalculate</button>
-      <button class="btn-danger" onclick="closeAdminModal()">Close</button>`;
-
+    document.getElementById('admin-action-btns').innerHTML=`<button class="btn-save" onclick="adminSaveResults()" style="flex:1;justify-content:center">💾 Save Results & Recalculate</button><button class="btn-danger" onclick="closeAdminModal()">Close</button>`;
   } else if(adminRound==='KO-SetTeams'){
-    // Set real teams for each KO match globally
-    html+=`<div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
-      ⚠️ <strong>Setting teams here is global and irreversible per match.</strong> When you set and save teams for a match, ALL users' existing predictions for that match will be wiped so they can re-predict with the correct teams. Locked matches show 🔒.
-    </div>`;
-
+    html+=`<div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text-secondary);margin-bottom:14px;">⚠️ <strong>Setting teams here is global and irreversible per match.</strong> When you set and save teams for a match, ALL users' existing predictions for that match will be wiped so they can re-predict with the correct teams. Locked matches show 🔒.</div>`;
     const roundLabels={R32:'Round of 32',R16:'Round of 16',QF:'Quarterfinals',SF:'Semifinals','3P':'3rd Place Playoff',F:'Grand Final'};
     KO_ROUND_ORDER.forEach(round=>{
       html+=`<div class="admin-section-head">${roundLabels[round]||round}</div>`;
@@ -1850,23 +1805,14 @@ function adminRenderMatches(){
         html+=`<div class="admin-match-row" id="admin-teams-row-${m.id}">
           <div class="admin-match-label">#${m.id} ${m.label}<br><span style="font-size:10px;color:var(--text-muted)">${m.date} · ${m.slot}</span></div>
           ${isLocked
-            ? `<span style="font-size:12px;font-weight:700;color:var(--text-primary)">${t1val}</span>
-               <span style="color:var(--text-muted);font-size:12px;margin:0 4px">vs</span>
-               <span style="font-size:12px;font-weight:700;color:var(--text-primary)">${t2val}</span>
-               <span class="locked-badge">🔒 Locked</span>`
-            : `${teamDropdownHTML('adt1-'+m.id, t1val)}
-               <span style="color:var(--text-muted);font-size:12px;margin:0 4px">vs</span>
-               ${teamDropdownHTML('adt2-'+m.id, t2val)}`
+            ?`<span style="font-size:12px;font-weight:700;color:var(--text-primary)">${t1val}</span><span style="color:var(--text-muted);font-size:12px;margin:0 4px">vs</span><span style="font-size:12px;font-weight:700;color:var(--text-primary)">${t2val}</span><span class="locked-badge">🔒 Locked</span>`
+            :`${teamDropdownHTML('adt1-'+m.id, t1val)}<span style="color:var(--text-muted);font-size:12px;margin:0 4px">vs</span>${teamDropdownHTML('adt2-'+m.id, t2val)}`
           }
         </div>`;
       });
     });
-    document.getElementById('admin-action-btns').innerHTML=`
-      <button class="btn-sky" onclick="adminSaveKOTeams()" style="flex:1;justify-content:center">🌍 Set Teams Globally</button>
-      <button class="btn-danger" onclick="closeAdminModal()">Close</button>`;
-
+    document.getElementById('admin-action-btns').innerHTML=`<button class="btn-sky" onclick="adminSaveKOTeams()" style="flex:1;justify-content:center">🌍 Set Teams Globally</button><button class="btn-danger" onclick="closeAdminModal()">Close</button>`;
   } else if(adminRound==='KO-Results'){
-    // Enter results — only for matches where teams are locked
     const hasAnyLocked=Object.values(koFixtures).some(f=>f.teams_locked);
     if(!hasAnyLocked){
       html=`<div class="empty-state"><div class="empty-state-icon">🔒</div><div class="empty-state-text">No knockout teams have been set yet. Use the "Set KO Teams" tab first.</div></div>`;
@@ -1885,11 +1831,9 @@ function adminRenderMatches(){
           const penDisplay=isDraw?'flex':'none';
           html+=`<div class="admin-match-row" id="admin-row-${m.id}">
             <div class="admin-match-label">#${m.id} <strong>${fix.team1}</strong> vs <strong>${fix.team2}</strong><br><span style="font-size:10px;color:var(--text-muted)">${m.date} · ${m.label}</span></div>
-            <input type="number" min="0" class="admin-score-input" id="ar1-${m.id}" value="${g1val!==null?g1val:''}" placeholder="—"
-              oninput="adminCheckPenVisibility(${m.id})">
+            <input type="number" min="0" class="admin-score-input" id="ar1-${m.id}" value="${g1val!==null?g1val:''}" placeholder="—" oninput="adminCheckPenVisibility(${m.id})">
             <span class="admin-sep">:</span>
-            <input type="number" min="0" class="admin-score-input" id="ar2-${m.id}" value="${g2val!==null?g2val:''}" placeholder="—"
-              oninput="adminCheckPenVisibility(${m.id})">
+            <input type="number" min="0" class="admin-score-input" id="ar2-${m.id}" value="${g2val!==null?g2val:''}" placeholder="—" oninput="adminCheckPenVisibility(${m.id})">
             <div class="admin-pen-wrap" id="admin-pen-wrap-${m.id}" style="display:${penDisplay}">
               <span class="admin-pen-label">⚡ Pens</span>
               <input type="number" min="0" class="admin-pen-input" id="apen1-${m.id}" value="${a.pen1||''}" placeholder="0">
@@ -1903,11 +1847,8 @@ function adminRenderMatches(){
         });
       });
     }
-    document.getElementById('admin-action-btns').innerHTML=`
-      <button class="btn-save" onclick="adminSaveResults()" style="flex:1;justify-content:center">💾 Save KO Results & Recalculate</button>
-      <button class="btn-danger" onclick="closeAdminModal()">Close</button>`;
+    document.getElementById('admin-action-btns').innerHTML=`<button class="btn-save" onclick="adminSaveResults()" style="flex:1;justify-content:center">💾 Save KO Results & Recalculate</button><button class="btn-danger" onclick="closeAdminModal()">Close</button>`;
   }
-
   document.getElementById('admin-matches-list').innerHTML=html;
 }
 
@@ -1919,52 +1860,33 @@ function adminCheckPenVisibility(mid){
   else{wrap.style.display='none';}
 }
 
-// Save real teams globally to Supabase + wipe affected predictions
 async function adminSaveKOTeams(){
   const toSave=[];
   KNOCKOUT_MATCHES.forEach(m=>{
-    const fix=koFixtures[sid(m.id)];
-    if(fix&&fix.teams_locked)return; // already locked, skip
-    const t1El=document.getElementById('adt1-'+m.id);
-    const t2El=document.getElementById('adt2-'+m.id);
+    const fix=koFixtures[sid(m.id)];if(fix&&fix.teams_locked)return;
+    const t1El=document.getElementById('adt1-'+m.id);const t2El=document.getElementById('adt2-'+m.id);
     if(!t1El||!t2El)return;
     const t1=t1El.value.trim();const t2=t2El.value.trim();
-    if(!t1||!t2)return; // both must be selected
+    if(!t1||!t2)return;
     if(t1===t2){showToast(`Match #${m.id}: both teams are the same — skipped.`,'warn');return;}
     toSave.push({id:m.id,team1:t1,team2:t2,teams_locked:true});
   });
-
   if(!toSave.length){showToast('No new team assignments to save.','warn');return;}
-
   if(!confirm(`Set teams for ${toSave.length} match(es) globally? This will wipe existing predictions for those matches from ALL users and cannot be undone.`))return;
-
-  // 1. Upsert team1/team2/teams_locked into matches table
   const {error:matchErr}=await supabaseClient.from('matches').upsert(toSave,{onConflict:'id'});
   if(matchErr){showToast('Error saving teams: '+matchErr.message,'error');return;}
-
-  // 2. Wipe predictions for those match IDs across all users
   const matchIds=toSave.map(x=>x.id);
   const {error:wipeErr}=await supabaseClient.from('predictions').delete().in('match_id',matchIds);
   if(wipeErr){showToast('Teams saved but failed to wipe old predictions: '+wipeErr.message,'error');}
-
-  // 3. Update local koFixtures cache
-  toSave.forEach(row=>{
-    koFixtures[sid(row.id)]={team1:row.team1,team2:row.team2,teams_locked:true};
-  });
-
+  toSave.forEach(row=>{koFixtures[sid(row.id)]={team1:row.team1,team2:row.team2,teams_locked:true};});
   showToast(`✅ Teams set for ${toSave.length} match(es). Old predictions wiped.`);
-
-  // Re-render admin panel and KO page if open
   adminRenderTabs();
   const s=getState();
-  if(document.getElementById('page-knockout').classList.contains('active')){
-    koPopulateTeams(s);koRenderTab(s);
-  }
+  if(document.getElementById('page-knockout').classList.contains('active')){koPopulateTeams(s);koRenderTab(s);}
 }
 
 async function adminSaveResults(){
   const s=getState();if(!s.actuals)s.actuals={};const supabaseUpdates=[];
-
   if(adminRound==='Groups'){
     GROUP_MATCHES.forEach(m=>{
       const r1=document.getElementById('ar1-'+m.id);const r2=document.getElementById('ar2-'+m.id);const cd=document.getElementById('acd-'+m.id);
@@ -1974,27 +1896,21 @@ async function adminSaveResults(){
       supabaseUpdates.push({id:m.id,actual_score1:g1val,actual_score2:g2val,completed:isCompleted,actual_pen1:null,actual_pen2:null});
     });
   } else if(adminRound==='KO-Results'){
-    // Only save results for locked KO matches
     KNOCKOUT_MATCHES.filter(m=>koFixtures[sid(m.id)]?.teams_locked).forEach(m=>{
       const r1=document.getElementById('ar1-'+m.id);const r2=document.getElementById('ar2-'+m.id);const cd=document.getElementById('acd-'+m.id);
       if(!r1||!r2||!cd)return;if(r1.value===''&&r2.value==='')return;
       const g1val=parseInt(r1.value)||0;const g2val=parseInt(r2.value)||0;const isCompleted=cd.checked;
       let pen1val=null,pen2val=null;
       const ap1=document.getElementById('apen1-'+m.id);const ap2=document.getElementById('apen2-'+m.id);
-      if(ap1&&ap2&&g1val===g2val&&ap1.value.trim()!==''){
-        pen1val=parseInt(ap1.value)||0;pen2val=parseInt(ap2.value)||0;
-      }
+      if(ap1&&ap2&&g1val===g2val&&ap1.value.trim()!==''){pen1val=parseInt(ap1.value)||0;pen2val=parseInt(ap2.value)||0;}
       s.actuals[sid(m.id)]={g1:g1val,g2:g2val,pen1:pen1val,pen2:pen2val,completed:isCompleted};
       supabaseUpdates.push({id:m.id,actual_score1:g1val,actual_score2:g2val,completed:isCompleted,actual_pen1:pen1val,actual_pen2:pen2val});
     });
   }
-
   saveState(s);_actualsSynced=false;
   if(!supabaseUpdates.length){showToast('No results to save.','warn');closeAdminModal();return;}
-
   const{error:matchErr}=await supabaseClient.from('matches').upsert(supabaseUpdates,{onConflict:'id'});
   if(matchErr){console.error('Admin save error:',matchErr.message);showToast('Results saved locally but Supabase sync failed: '+matchErr.message,'error');closeAdminModal();return;}
-
   showToast(`✅ ${supabaseUpdates.length} results saved — recalculating leaderboard…`);closeAdminModal();
   setTimeout(async()=>{
     await syncActualsFromSupabase(true);
@@ -2006,52 +1922,19 @@ async function adminSaveResults(){
   },800);
 }
 
-// ══════════════════════════════════════════════════════
-// LEADERBOARD RECALC — pulls all predictions, scores with team check
-// ══════════════════════════════════════════════════════
 async function recalcAndPushLeaderboard(){
   try{
     const s=getState();const actuals=s.actuals||{};
-
-    // 1. Pull every prediction
-    const{data:preds,error:pErr}=await supabaseClient
-      .from('predictions')
-      .select('user_id,match_id,pred_score1,pred_score2,pred_pen1,pred_pen2,doubled');
+    const{data:preds,error:pErr}=await supabaseClient.from('predictions').select('user_id,match_id,pred_score1,pred_score2,pred_pen1,pred_pen2,doubled');
     if(pErr){console.error('recalc preds error:',pErr.message);return;}
-
-    // 2. Pull user names
     const{data:users,error:uErr}=await supabaseClient.from('users').select('id,name,email');
     if(uErr){console.error('recalc users error:',uErr.message);return;}
     const userMap={};(users||[]).forEach(u=>{userMap[u.id]={name:u.name,email:u.email};});
-
-    // 3. We need each user's knockoutTeams to check if they predicted right teams
-    // Pull all KO predictions and check against koFixtures
     const byUser={};
     (preds||[]).forEach(row=>{
       if(!byUser[row.user_id])byUser[row.user_id]={exact:0,margin:0,result:0,missed:0,doubleBonus:0,total:0,doublesUsed:0};
-      const actual=actuals[sid(row.match_id)];
-      if(!actual||!actual.completed)return;
-
-      const midInt=parseInt(row.match_id);
-
-      // For KO matches: check if prediction was made for the correct teams
-      if(KO_MATCH_IDS.has(midInt)){
-        const fix=koFixtures[sid(midInt)];
-        if(fix&&fix.teams_locked){
-          // We need to compare what team the user predicted for this slot
-          // The prediction row doesn't store team names — we store them in knockoutTeams locally
-          // For server-side recalc: we check if this prediction was submitted AFTER teams were locked
-          // by checking if the prediction still exists (if teams changed, predictions were wiped)
-          // So if a prediction exists for a locked KO match → it was submitted for the correct teams ✅
-          // (because we wiped old ones when locking)
-        }
-      }
-
-      const pred={
-        g1:row.pred_score1,g2:row.pred_score2,
-        pen1:row.pred_pen1,pen2:row.pred_pen2,
-        doubled:row.doubled
-      };
+      const actual=actuals[sid(row.match_id)];if(!actual||!actual.completed)return;
+      const pred={g1:row.pred_score1,g2:row.pred_score2,pen1:row.pred_pen1,pen2:row.pred_pen2,doubled:row.doubled};
       const{pts,tier,penPts,penTier,hasPen}=calcMatchScore(pred,actual);
       const multiplier=row.doubled?2:1;
       const finalPts=(pts+penPts)*multiplier;
@@ -2069,19 +1952,10 @@ async function recalcAndPushLeaderboard(){
       }
       byUser[row.user_id].total+=finalPts;
     });
-
-    // 4. Upsert leaderboard
     const lbRows=Object.entries(byUser).map(([userId,stats])=>({
-      user_id:userId,
-      name:(userMap[userId]||{}).name||'Anonymous',
-      email:(userMap[userId]||{}).email||null,
-      total_points:stats.total,
-      exact_scores:stats.exact,
-      correct_margins:stats.margin,
-      correct_results:stats.result,
-      missed:stats.missed,
-      doubles_used:stats.doublesUsed,
-      updated_at:new Date().toISOString()
+      user_id:userId,name:(userMap[userId]||{}).name||'Anonymous',email:(userMap[userId]||{}).email||null,
+      total_points:stats.total,exact_scores:stats.exact,correct_margins:stats.margin,correct_results:stats.result,
+      missed:stats.missed,doubles_used:stats.doublesUsed,updated_at:new Date().toISOString()
     }));
     if(!lbRows.length){console.log('No scored predictions yet.');return;}
     const{error:lbErr}=await supabaseClient.from('leaderboard').upsert(lbRows,{onConflict:'user_id'});

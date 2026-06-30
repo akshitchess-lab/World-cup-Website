@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PunditLeague Pro — Admin</title>
+<style>
+:root {
+  --bg-deep:#060913;--bg-card:#0e1322;--bg-card2:#111827;--bg-card3:#1a2035;
+  --accent-sky:#38bdf8;--accent-green:#10b981;--accent-amber:#f59e0b;
+  --accent-purple:#a855f7;--accent-red:#ef4444;
+  --text-primary:#f0f4ff;--text-secondary:#94a3b8;--text-muted:#4b5563;
+  --border-subtle:#1e2a3a;--border-mid:#2d3f55;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text-primary);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;min-height:100vh;}
+::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--bg-deep);}
+::-webkit-scrollbar-thumb{background:#2d3f55;border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--accent-sky);}
+.topbar{background:linear-gradient(135deg,#0a0f1e,#0e1a2e,#0a0f1e);border-bottom:1px solid var(--border-subtle);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.topbar-brand{display:flex;align-items:center;gap:10px;}
+.topbar-logo{width:38px;height:38px;background:linear-gradient(135deg,var(--accent-sky),var(--accent-purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;}
+.brand-name{font-size:16px;font-weight:800;}
+.brand-sub{font-size:10px;color:var(--accent-sky);text-transform:uppercase;letter-spacing:1px;}
+.btn-nav{background:transparent;border:1px solid var(--border-mid);color:var(--text-secondary);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-nav:hover{border-color:var(--accent-sky);color:var(--accent-sky);}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 80px;}
+.login-box{background:var(--bg-card);border:1px solid var(--border-mid);border-radius:16px;padding:32px;max-width:380px;margin:60px auto;}
+.login-title{font-size:18px;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.login-subtitle{font-size:12px;color:var(--text-muted);margin-bottom:24px;}
+.admin-input{background:var(--bg-card3);border:1px solid var(--border-mid);border-radius:8px;padding:10px 14px;color:var(--text-primary);font-size:14px;outline:none;width:100%;}
+.admin-input:focus{border-color:var(--accent-sky);}
+.btn-save{background:linear-gradient(135deg,var(--accent-green),#059669);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;width:100%;margin-top:14px;}
+.btn-save:hover{transform:translateY(-1px);}
+.btn-sky{background:linear-gradient(135deg,var(--accent-sky),#0ea5e9);color:#000;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;}
+.btn-sky:hover{transform:translateY(-1px);}
+.btn-danger{background:transparent;color:var(--text-muted);border:1px solid var(--border-mid);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-danger:hover{border-color:var(--accent-red);color:var(--accent-red);}
+.admin-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.admin-tab{background:var(--bg-card3);border:1px solid var(--border-subtle);color:var(--text-muted);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.admin-tab.active{background:var(--accent-sky);border-color:var(--accent-sky);color:#000;font-weight:700;}
+.admin-section-head{font-size:10px;font-weight:700;color:var(--accent-sky);text-transform:uppercase;letter-spacing:1.5px;padding:14px 0 6px;border-top:1px solid var(--border-subtle);margin-top:10px;}
+.admin-section-head:first-child{border-top:none;margin-top:0;}
+.admin-match-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;}
+.admin-match-row:last-child{border-bottom:none;}
+.admin-match-label{flex:1;font-size:12px;font-weight:600;min-width:160px;}
+.admin-score-input{width:40px;height:34px;background:var(--bg-card3);border:1px solid var(--border-mid);border-radius:6px;color:var(--text-primary);font-size:14px;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.admin-score-input::-webkit-inner-spin-button,.admin-score-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.admin-score-input:focus{border-color:var(--accent-sky);}
+.admin-pen-input{width:36px;height:30px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.35);border-radius:6px;color:var(--accent-purple);font-size:13px;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.admin-pen-input::-webkit-inner-spin-button,.admin-pen-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.admin-pen-input:focus{border-color:var(--accent-purple);}
+.admin-pen-wrap{display:flex;align-items:center;gap:4px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:6px;padding:3px 7px;}
+.admin-pen-label{font-size:9px;color:var(--accent-purple);font-weight:700;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+.admin-sep{font-size:14px;color:var(--text-muted);font-weight:700;}
+.admin-done-cb{width:16px;height:16px;accent-color:var(--accent-green);cursor:pointer;}
+.admin-team-select{background:var(--bg-card3);border:1px solid var(--border-mid);border-radius:6px;color:var(--text-primary);font-size:12px;padding:5px 8px;outline:none;cursor:pointer;min-width:130px;}
+.admin-team-select:focus{border-color:var(--accent-sky);}
+.locked-badge{font-size:9px;font-weight:700;background:rgba(56,189,248,0.12);color:var(--accent-sky);border:1px solid rgba(56,189,248,0.3);border-radius:4px;padding:2px 7px;white-space:nowrap;}
+.notice{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text-secondary);margin-bottom:14px;}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);}
+.empty-state-icon{font-size:40px;margin-bottom:12px;}
+#toast-container{position:fixed;top:80px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--bg-card);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:600;color:var(--text-primary);border-left:3px solid var(--accent-green);box-shadow:0 4px 20px rgba(0,0,0,.4);animation:toast-in .3s ease,toast-out .3s ease 2.5s forwards;pointer-events:auto;max-width:320px;}
+.toast.warn{border-left-color:var(--accent-amber);}.toast.error{border-left-color:var(--accent-red);}
+@keyframes toast-in{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toast-out{from{opacity:1}to{opacity:0;pointer-events:none}}
+.err-msg{color:var(--accent-red);font-size:12px;margin-top:10px;display:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">PL</div>
+    <div><div class="brand-name">PunditLeague <span style="color:var(--accent-sky)">Pro</span></div><div class="brand-sub">Admin Console</div></div>
+  </div>
+  <a class="btn-nav" href="index.html">← Back to Site</a>
+</div>
+
+<div id="login-view" class="wrap">
+  <div class="login-box">
+    <div class="login-title">🔐 Admin Access</div>
+    <div class="login-subtitle">Enter the admin password to access the results panel.</div>
+    <input type="password" class="admin-input" id="admin-pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="btn-save" onclick="adminLogin()">Unlock Panel</button>
+    <div class="err-msg" id="admin-pw-error">Incorrect password.</div>
+  </div>
+</div>
+
+<div id="panel-view" class="wrap" style="display:none">
+  <div class="admin-tabs" id="admin-tabs"></div>
+  <div id="admin-matches-list"></div>
+  <div class="action-row" id="admin-action-btns"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient } = window.supabase;
+const supabaseClient = createClient(
+  "https://hqbnekjedyxuarnqujfl.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxYm5la2plZHl4dWFybnF1amZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODA3MzksImV4cCI6MjA5Njg1NjczOX0.GrZ7HR4AWfr3D-4npBlBIQJtbiJTM65LYY5Fb-eFdHc"
+);
+
+const ADMIN_PASSWORD = 'admin2026';
+
+const ALL_TEAMS = [
+  'Mexico','South Africa','South Korea','Czechia','Canada','Bosnia','Qatar','Switzerland',
+  'Brazil','Morocco','Haiti','Scotland','United States','Paraguay','Australia','Türkiye',
+  'Germany','Curaçao','Ivory Coast','Ecuador','Netherlands','Japan','Sweden','Tunisia',
+  'Belgium','Egypt','Iran','New Zealand','Spain','Cabo Verde','Saudi Arabia','Uruguay',
+  'France','Senegal','Iraq','Norway','Argentina','Algeria','Austria','Jordan',
+  'Portugal','DR Congo','Uzbekistan','Colombia','England','Croatia','Ghana','Panama'
+].sort();
+
+const GROUP_MATCHES = [
+  {id:1,group:'A',date:'Jun 11 · 12:30am IST',t1:'Mexico',t2:'South Africa'},
+  {id:2,group:'A',date:'Jun 11 · 12:30am IST',t1:'South Korea',t2:'Czechia'},
+  {id:3,group:'A',date:'Jun 18 · 9:30pm IST',t1:'Czechia',t2:'South Africa'},
+  {id:4,group:'A',date:'Jun 19 · 6:30am IST',t1:'Mexico',t2:'South Korea'},
+  {id:5,group:'A',date:'Jun 25 · 6:30am IST',t1:'Czechia',t2:'Mexico'},
+  {id:6,group:'A',date:'Jun 25 · 6:30am IST',t1:'South Africa',t2:'South Korea'},
+  {id:7,group:'B',date:'Jun 12 · 12:30am IST',t1:'Canada',t2:'Bosnia'},
+  {id:8,group:'B',date:'Jun 13 · 9:30pm IST',t1:'Qatar',t2:'Switzerland'},
+  {id:9,group:'B',date:'Jun 18 · 12:30am IST',t1:'Switzerland',t2:'Bosnia'},
+  {id:10,group:'B',date:'Jun 18 · 3:30am IST',t1:'Canada',t2:'Qatar'},
+  {id:11,group:'B',date:'Jun 25 · 12:30am IST',t1:'Switzerland',t2:'Canada'},
+  {id:12,group:'B',date:'Jun 25 · 12:30am IST',t1:'Bosnia',t2:'Qatar'},
+  {id:13,group:'C',date:'Jun 13 · 9:30pm IST',t1:'Brazil',t2:'Morocco'},
+  {id:14,group:'C',date:'Jun 13 · 9:30pm IST',t1:'Haiti',t2:'Scotland'},
+  {id:15,group:'C',date:'Jun 19 · 6:00am IST',t1:'Brazil',t2:'Haiti'},
+  {id:16,group:'C',date:'Jun 19 · 3:30am IST',t1:'Scotland',t2:'Morocco'},
+  {id:17,group:'C',date:'Jun 25 · 3:30am IST',t1:'Scotland',t2:'Brazil'},
+  {id:18,group:'C',date:'Jun 25 · 3:30am IST',t1:'Morocco',t2:'Haiti'},
+  {id:19,group:'D',date:'Jun 12 · 6:30am IST',t1:'United States',t2:'Paraguay'},
+  {id:20,group:'D',date:'Jun 14 · 11:30pm IST',t1:'Australia',t2:'Türkiye'},
+  {id:21,group:'D',date:'Jun 20 · 8:30am IST',t1:'Türkiye',t2:'Paraguay'},
+  {id:22,group:'D',date:'Jun 20 · 12:30am IST',t1:'United States',t2:'Australia'},
+  {id:23,group:'D',date:'Jun 26 · 7:30am IST',t1:'Türkiye',t2:'United States'},
+  {id:24,group:'D',date:'Jun 26 · 7:30am IST',t1:'Paraguay',t2:'Australia'},
+  {id:25,group:'E',date:'Jun 15 · 4:30am IST',t1:'Ivory Coast',t2:'Ecuador'},
+  {id:26,group:'E',date:'Jun 14 · 8:30pm IST',t1:'Germany',t2:'Curaçao'},
+  {id:27,group:'E',date:'Jun 21 · 1:30am IST',t1:'Germany',t2:'Ivory Coast'},
+  {id:28,group:'E',date:'Jun 21 · 5:30am IST',t1:'Ecuador',t2:'Curaçao'},
+  {id:29,group:'E',date:'Jun 26 · 1:30am IST',t1:'Curaçao',t2:'Ivory Coast'},
+  {id:30,group:'E',date:'Jun 26 · 1:30am IST',t1:'Ecuador',t2:'Germany'},
+  {id:31,group:'F',date:'Jun 14 · 8:30pm IST',t1:'Netherlands',t2:'Japan'},
+  {id:32,group:'F',date:'Jun 15 · 7:30am IST',t1:'Sweden',t2:'Tunisia'},
+  {id:33,group:'F',date:'Jun 20 · 10:30pm IST',t1:'Netherlands',t2:'Sweden'},
+  {id:34,group:'F',date:'Jun 21 · 9:30am IST',t1:'Tunisia',t2:'Japan'},
+  {id:35,group:'F',date:'Jun 26 · 4:30am IST',t1:'Japan',t2:'Sweden'},
+  {id:36,group:'F',date:'Jun 26 · 4:30am IST',t1:'Tunisia',t2:'Netherlands'},
+  {id:37,group:'G',date:'Jun 16 · 6:30am IST',t1:'Iran',t2:'New Zealand'},
+  {id:38,group:'G',date:'Jun 16 · 12:30am IST',t1:'Belgium',t2:'Egypt'},
+  {id:39,group:'G',date:'Jun 21 · 12:30am IST',t1:'Belgium',t2:'Iran'},
+  {id:40,group:'G',date:'Jun 22 · 6:30am IST',t1:'New Zealand',t2:'Egypt'},
+  {id:41,group:'G',date:'Jun 27 · 8:30am IST',t1:'New Zealand',t2:'Belgium'},
+  {id:42,group:'G',date:'Jun 27 · 8:30am IST',t1:'Egypt',t2:'Iran'},
+  {id:43,group:'H',date:'Jun 16 · 3:30am IST',t1:'Saudi Arabia',t2:'Uruguay'},
+  {id:44,group:'H',date:'Jun 15 · 9:30pm IST',t1:'Spain',t2:'Cabo Verde'},
+  {id:45,group:'H',date:'Jun 21 · 3:30am IST',t1:'Uruguay',t2:'Cabo Verde'},
+  {id:46,group:'H',date:'Jun 21 · 9:30pm IST',t1:'Spain',t2:'Saudi Arabia'},
+  {id:47,group:'H',date:'Jun 27 · 5:30am IST',t1:'Cabo Verde',t2:'Saudi Arabia'},
+  {id:48,group:'H',date:'Jun 27 · 5:30am IST',t1:'Uruguay',t2:'Spain'},
+  {id:49,group:'I',date:'Jun 17 · 12:30am IST',t1:'France',t2:'Senegal'},
+  {id:50,group:'I',date:'Jun 17 · 3:30am IST',t1:'Iraq',t2:'Norway'},
+  {id:51,group:'I',date:'Jun 22 · 5:30am IST',t1:'Norway',t2:'Senegal'},
+  {id:52,group:'I',date:'Jun 22 · 2:30am IST',t1:'France',t2:'Iraq'},
+  {id:53,group:'I',date:'Jun 27 · 12:30am IST',t1:'Norway',t2:'France'},
+  {id:54,group:'I',date:'Jun 27 · 12:30am IST',t1:'Senegal',t2:'Iraq'},
+  {id:55,group:'J',date:'Jun 17 · 6:30am IST',t1:'Argentina',t2:'Algeria'},
+  {id:56,group:'J',date:'Jun 17 · 9:30am IST',t1:'Austria',t2:'Jordan'},
+  {id:57,group:'J',date:'Jun 22 · 10:30pm IST',t1:'Argentina',t2:'Austria'},
+  {id:58,group:'J',date:'Jun 23 · 8:30am IST',t1:'Jordan',t2:'Algeria'},
+  {id:59,group:'J',date:'Jun 28 · 7:30am IST',t1:'Algeria',t2:'Austria'},
+  {id:60,group:'J',date:'Jun 28 · 7:30am IST',t1:'Jordan',t2:'Argentina'},
+  {id:61,group:'K',date:'Jun 17 · 10:30pm IST',t1:'Portugal',t2:'DR Congo'},
+  {id:62,group:'K',date:'Jun 18 · 7:30am IST',t1:'Uzbekistan',t2:'Colombia'},
+  {id:63,group:'K',date:'Jun 23 · 10:30pm IST',t1:'Portugal',t2:'Uzbekistan'},
+  {id:64,group:'K',date:'Jun 24 · 7:30am IST',t1:'Colombia',t2:'DR Congo'},
+  {id:65,group:'K',date:'Jun 28 · 5:00am IST',t1:'Colombia',t2:'Portugal'},
+  {id:66,group:'K',date:'Jun 28 · 5:00am IST',t1:'DR Congo',t2:'Uzbekistan'},
+  {id:67,group:'L',date:'Jun 17 · 4:30am IST',t1:'Ghana',t2:'Panama'},
+  {id:68,group:'L',date:'Jun 17 · 1:30am IST',t1:'England',t2:'Croatia'},
+  {id:69,group:'L',date:'Jun 23 · 1:30am IST',t1:'England',t2:'Ghana'},
+  {id:70,group:'L',date:'Jun 24 · 4:30am IST',t1:'Panama',t2:'Croatia'},
+  {id:71,group:'L',date:'Jun 28 · 2:30am IST',t1:'Panama',t2:'England'},
+  {id:72,group:'L',date:'Jun 28 · 2:30am IST',t1:'Croatia',t2:'Ghana'},
+];
+
+const KNOCKOUT_MATCHES = [
+  {id:73,round:'R32',label:'R32 M1',slot:'2A v 2B',date:'Jun 29 · 12:30am IST'},
+  {id:74,round:'R32',label:'R32 M2',slot:'1E v 3rd',date:'Jun 29 · 2:00am IST'},
+  {id:75,round:'R32',label:'R32 M3',slot:'1F v 2C',date:'Jun 30 · 6:30am IST'},
+  {id:76,round:'R32',label:'R32 M4',slot:'1C v 2F',date:'Jun 29 · 10:30pm IST'},
+  {id:77,round:'R32',label:'R32 M5',slot:'1I v 3rd',date:'Jun 30 · 2:30am IST'},
+  {id:78,round:'R32',label:'R32 M6',slot:'2E v 2I',date:'Jun 30 · 10:30pm IST'},
+  {id:79,round:'R32',label:'R32 M7',slot:'1A v 3rd',date:'Jul 1 · 6:30am IST'},
+  {id:80,round:'R32',label:'R32 M8',slot:'1L v 3rd',date:'Jul 1 · 9:30pm IST'},
+  {id:81,round:'R32',label:'R32 M9',slot:'1D v 3rd',date:'Jul 2 · 5:30am IST'},
+  {id:82,round:'R32',label:'R32 M10',slot:'1G v 3rd',date:'Jul 2 · 1:30am IST'},
+  {id:83,round:'R32',label:'R32 M11',slot:'2K v 2L',date:'Jul 2 · 11:30pm IST'},
+  {id:84,round:'R32',label:'R32 M12',slot:'1H v 2J',date:'Jul 3 · 12:30am IST'},
+  {id:85,round:'R32',label:'R32 M13',slot:'1B v 3rd',date:'Jul 3 · 8:30am IST'},
+  {id:86,round:'R32',label:'R32 M14',slot:'1J v 2H',date:'Jul 4 · 3:30am IST'},
+  {id:87,round:'R32',label:'R32 M15',slot:'1K v 3rd',date:'Jul 4 · 7:00am IST'},
+  {id:88,round:'R32',label:'R32 M16',slot:'2D v 2G',date:'Jul 3 · 11:30pm IST'},
+  {id:89,round:'R16',label:'R16 M1',slot:'W74 v W77',date:'Jul 4 · 2:30am IST'},
+  {id:90,round:'R16',label:'R16 M2',slot:'W73 v W75',date:'Jul 4 · 10:30pm IST'},
+  {id:91,round:'R16',label:'R16 M3',slot:'W76 v W78',date:'Jul 5 · 1:30am IST'},
+  {id:92,round:'R16',label:'R16 M4',slot:'W79 v W80',date:'Jul 6 · 5:30am IST'},
+  {id:93,round:'R16',label:'R16 M5',slot:'W83 v W84',date:'Jul 7 · 12:30am IST'},
+  {id:94,round:'R16',label:'R16 M6',slot:'W81 v W82',date:'Jul 7 · 5:30am IST'},
+  {id:95,round:'R16',label:'R16 M7',slot:'W86 v W88',date:'Jul 7 · 9:30pm IST'},
+  {id:96,round:'R16',label:'R16 M8',slot:'W85 v W87',date:'Jul 8 · 1:30am IST'},
+  {id:97,round:'QF',label:'QF M1',slot:'W89 v W90',date:'Jul 10 · 1:30am IST'},
+  {id:98,round:'QF',label:'QF M2',slot:'W93 v W94',date:'Jul 10 · 12:30am IST'},
+  {id:99,round:'QF',label:'QF M3',slot:'W91 v W92',date:'Jul 12 · 2:30am IST'},
+  {id:100,round:'QF',label:'QF M4',slot:'W95 v W96',date:'Jul 12 · 6:30am IST'},
+  {id:101,round:'SF',label:'Semifinal 1',slot:'W97 v W98',date:'Jul 15 · 12:30am IST'},
+  {id:102,round:'SF',label:'Semifinal 2',slot:'W99 v W100',date:'Jul 16 · 12:30am IST'},
+  {id:103,round:'3P',label:'3rd Place Playoff',slot:'L101 v L102',date:'Jul 19 · 2:30am IST'},
+  {id:104,round:'F',label:'🏆 GRAND FINAL',slot:'W101 v W102',date:'Jul 19 · 12:30am IST'},
+];
+const KO_ROUND_ORDER = ['R32','R16','QF','SF','3P','F'];
+
+function sid(id){return String(id);}
+
+function showToast(msg,type='success'){
+  const c=document.getElementById('toast-container');const t=document.createElement('div');
+  t.className=`toast${type==='warn'?' warn':type==='error'?' error':''}`;t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>{try{c.removeChild(t);}catch(e){}},3000);
+}
+function teamDropdownHTML(selectId, selectedVal, emptyLabel='— Select Team —'){
+  const opts = ALL_TEAMS.map(t=>`<option value="${t}"${t===selectedVal?' selected':''}>${t}</option>`).join('');
+  return`<select class="admin-team-select" id="${selectId}"><option value="">${emptyLabel}</option>${opts}</select>`;
+}
+
+// ── SCORING ENGINE (mirrors index.html) ──
+function calcMatchScore(pred,actual){
+  const pG1=parseInt(pred.g1)||0,pG2=parseInt(pred.g2)||0;
+  const aG1=parseInt(actual.g1)||0,aG2=parseInt(actual.g2)||0;
+  const pMargin=pG1-pG2,aMargin=aG1-aG2;
+  const pOut=pG1>pG2?'H':pG1<pG2?'A':'D';
+  const aOut=aG1>aG2?'H':aG1<aG2?'A':'D';
+  let basePts=0,baseTier='miss';
+  if(pG1===aG1&&pG2===aG2){basePts=20;baseTier='exact';}
+  else if(pMargin===aMargin){basePts=15;baseTier='margin';}
+  else if(pOut===aOut){basePts=10;baseTier='result';}
+  let penPts=0,penTier=null;
+  const isActualDraw=aG1===aG2;
+  const hasPen=isActualDraw&&actual.pen1!=null&&actual.pen2!=null;
+  if(hasPen){
+    const pP1=parseInt(pred.pen1)||0,pP2=parseInt(pred.pen2)||0;
+    const aP1=parseInt(actual.pen1)||0,aP2=parseInt(actual.pen2)||0;
+    const pPMargin=pP1-pP2,aPMargin=aP1-aP2;
+    const pPOut=pP1>pP2?'H':pP1<pP2?'A':'D';
+    const aPOut=aP1>aP2?'H':aP1<aP2?'A':'D';
+    if(pP1===aP1&&pP2===aP2){penPts=20;penTier='exact';}
+    else if(pPMargin===aPMargin){penPts=15;penTier='margin';}
+    else if(pPOut===aPOut){penPts=10;penTier='result';}
+    else{penPts=0;penTier='miss';}
+  }
+  return{pts:basePts,tier:baseTier,penPts,penTier,hasPen};
+}
+
+// ── STATE (fetched live from Supabase, never from localStorage) ──
+let actuals = {};   // { matchId: {g1,g2,pen1,pen2,completed} }
+let koFixtures = {}; // { matchId: {team1,team2,teams_locked} }
+let adminRound = 'Groups';
+
+async function fetchAllMatches(){
+  const {data,error} = await supabaseClient.from('matches').select('id,team1,team2,teams_locked,actual_score1,actual_score2,actual_pen1,actual_pen2,completed');
+  if(error){showToast('Error loading matches: '+error.message,'error');return;}
+  actuals = {};koFixtures = {};
+  (data||[]).forEach(row=>{
+    if(row.actual_score1!=null||row.actual_score2!=null||row.completed){
+      actuals[sid(row.id)]={g1:row.actual_score1??0,g2:row.actual_score2??0,pen1:row.actual_pen1??null,pen2:row.actual_pen2??null,completed:row.completed||false};
+    }
+    if(row.id>=73&&row.id<=104&&(row.team1||row.team2||row.teams_locked)){
+      koFixtures[sid(row.id)]={team1:row.team1||null,team2:row.team2||null,teams_locked:!!row.teams_locked};
+    }
+  });
+}
+
+// ── LOGIN ──
+function adminLogin(){
+  const pw=document.getElementById('admin-pw-input').value;
+  if(pw===ADMIN_PASSWORD){
+    document.getElementById('login-view').style.display='none';
+    document.getElementById('panel-view').style.display='block';
+    initAdminPanel();
+  }else{
+    document.getElementById('admin-pw-error').style.display='block';
+  }
+}
+document.getElementById('admin-pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin();});
+
+async function initAdminPanel(){
+  showToast('Loading match data…');
+  await fetchAllMatches();
+  adminRenderTabs();
+}
+
+function adminRenderTabs(){
+  const mainTabs=[{id:'Groups',label:'⚽ Group Stage'},{id:'KO-SetTeams',label:'🔧 Set KO Teams'},{id:'KO-Results',label:'📋 KO Results'}];
+  document.getElementById('admin-tabs').innerHTML=mainTabs.map(t=>`<button class="admin-tab${adminRound===t.id?' active':''}" onclick="adminSelectTab('${t.id}')">${t.label}</button>`).join('');
+  adminRenderMatches();
+}
+
+function adminSelectTab(r){adminRound=r;adminRenderTabs();}
+
+function adminRenderMatches(){
+  let html='';
+  if(adminRound==='Groups'){
+    ['A','B','C','D','E','F','G','H','I','J','K','L'].forEach(g=>{
+      html+=`<div class="admin-section-head">Group ${g}</div>`;
+      GROUP_MATCHES.filter(m=>m.group===g).forEach(m=>{
+        const a=actuals[sid(m.id)]||{g1:'',g2:'',completed:false};
+        html+=`<div class="admin-match-row">
+          <div class="admin-match-label">#${m.id} ${m.t1} vs ${m.t2}<br><span style="font-size:10px;color:var(--text-muted)">${m.date}</span></div>
+          <input type="number" min="0" class="admin-score-input" id="ar1-${m.id}" value="${a.g1!==undefined&&a.g1!==''?a.g1:''}" placeholder="—">
+          <span class="admin-sep">:</span>
+          <input type="number" min="0" class="admin-score-input" id="ar2-${m.id}" value="${a.g2!==undefined&&a.g2!==''?a.g2:''}" placeholder="—">
+          <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+            <input type="checkbox" class="admin-done-cb" id="acd-${m.id}" ${a.completed?'checked':''}> Done
+          </label>
+        </div>`;
+      });
+    });
+    document.getElementById('admin-action-btns').innerHTML=`<button class="btn-save" style="margin-top:0;flex:1" onclick="adminSaveResults()">💾 Save Results & Recalculate</button><button class="btn-danger" onclick="window.location.href='index.html'">Close</button>`;
+  } else if(adminRound==='KO-SetTeams'){
+    html+=`<div class="notice">⚠️ <strong>Setting teams here is global and irreversible per match.</strong> When you set and save teams for a match, ALL users' existing predictions for that match will be wiped so they can re-predict with the correct teams. Locked matches show 🔒.</div>`;
+    const roundLabels={R32:'Round of 32',R16:'Round of 16',QF:'Quarterfinals',SF:'Semifinals','3P':'3rd Place Playoff',F:'Grand Final'};
+    KO_ROUND_ORDER.forEach(round=>{
+      html+=`<div class="admin-section-head">${roundLabels[round]||round}</div>`;
+      KNOCKOUT_MATCHES.filter(m=>m.round===round).forEach(m=>{
+        const fix=koFixtures[sid(m.id)]||{};
+        const isLocked=fix.teams_locked||false;
+        const t1val=fix.team1||'';const t2val=fix.team2||'';
+        html+=`<div class="admin-match-row" id="admin-teams-row-${m.id}">
+          <div class="admin-match-label">#${m.id} ${m.label}<br><span style="font-size:10px;color:var(--text-muted)">${m.date} · ${m.slot}</span></div>
+          ${isLocked
+            ?`<span style="font-size:12px;font-weight:700;color:var(--text-primary)">${t1val}</span><span style="color:var(--text-muted);font-size:12px;margin:0 4px">vs</span><span style="font-size:12px;font-weight:700;color:var(--text-primary)">${t2val}</span><span class="locked-badge">🔒 Locked</span>`
+            :`${teamDropdownHTML('adt1-'+m.id, t1val)}<span style="color:var(--text-muted);font-size:12px;margin:0 4px">vs</span>${teamDropdownHTML('adt2-'+m.id, t2val)}`
+          }
+        </div>`;
+      });
+    });
+    document.getElementById('admin-action-btns').innerHTML=`<button class="btn-sky" style="flex:1" onclick="adminSaveKOTeams()">🌍 Set Teams Globally</button><button class="btn-danger" onclick="window.location.href='index.html'">Close</button>`;
+  } else if(adminRound==='KO-Results'){
+    const hasAnyLocked=Object.values(koFixtures).some(f=>f.teams_locked);
+    if(!hasAnyLocked){
+      html=`<div class="empty-state"><div class="empty-state-icon">🔒</div><div>No knockout teams have been set yet. Use the "Set KO Teams" tab first.</div></div>`;
+    } else {
+      const roundLabels={R32:'Round of 32',R16:'Round of 16',QF:'Quarterfinals',SF:'Semifinals','3P':'3rd Place Playoff',F:'Grand Final'};
+      KO_ROUND_ORDER.forEach(round=>{
+        const matchesInRound=KNOCKOUT_MATCHES.filter(m=>m.round===round&&koFixtures[sid(m.id)]?.teams_locked);
+        if(!matchesInRound.length)return;
+        html+=`<div class="admin-section-head">${roundLabels[round]||round}</div>`;
+        matchesInRound.forEach(m=>{
+          const fix=koFixtures[sid(m.id)]||{};
+          const a=actuals[sid(m.id)]||{g1:'',g2:'',pen1:'',pen2:'',completed:false};
+          const g1val=a.g1!==undefined&&a.g1!==''?parseInt(a.g1):null;
+          const g2val=a.g2!==undefined&&a.g2!==''?parseInt(a.g2):null;
+          const isDraw=g1val!==null&&g2val!==null&&g1val===g2val;
+          const penDisplay=isDraw?'flex':'none';
+          html+=`<div class="admin-match-row" id="admin-row-${m.id}">
+            <div class="admin-match-label">#${m.id} <strong>${fix.team1}</strong> vs <strong>${fix.team2}</strong><br><span style="font-size:10px;color:var(--text-muted)">${m.date} · ${m.label}</span></div>
+            <input type="number" min="0" class="admin-score-input" id="ar1-${m.id}" value="${g1val!==null?g1val:''}" placeholder="—" oninput="adminCheckPenVisibility(${m.id})">
+            <span class="admin-sep">:</span>
+            <input type="number" min="0" class="admin-score-input" id="ar2-${m.id}" value="${g2val!==null?g2val:''}" placeholder="—" oninput="adminCheckPenVisibility(${m.id})">
+            <div class="admin-pen-wrap" id="admin-pen-wrap-${m.id}" style="display:${penDisplay}">
+              <span class="admin-pen-label">⚡ Pens</span>
+              <input type="number" min="0" class="admin-pen-input" id="apen1-${m.id}" value="${a.pen1||''}" placeholder="0">
+              <span class="admin-sep" style="color:var(--accent-purple)">–</span>
+              <input type="number" min="0" class="admin-pen-input" id="apen2-${m.id}" value="${a.pen2||''}" placeholder="0">
+            </div>
+            <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+              <input type="checkbox" class="admin-done-cb" id="acd-${m.id}" ${a.completed?'checked':''}> Done
+            </label>
+          </div>`;
+        });
+      });
+    }
+    document.getElementById('admin-action-btns').innerHTML=`<button class="btn-save" style="margin-top:0;flex:1" onclick="adminSaveResults()">💾 Save KO Results & Recalculate</button><button class="btn-danger" onclick="window.location.href='index.html'">Close</button>`;
+  }
+  document.getElementById('admin-matches-list').innerHTML=html;
+}
+
+function adminCheckPenVisibility(mid){
+  const r1=document.getElementById('ar1-'+mid);const r2=document.getElementById('ar2-'+mid);const wrap=document.getElementById('admin-pen-wrap-'+mid);
+  if(!r1||!r2||!wrap)return;
+  const v1=r1.value.trim(),v2=r2.value.trim();
+  if(v1!==''&&v2!==''&&parseInt(v1)===parseInt(v2)){wrap.style.display='flex';}
+  else{wrap.style.display='none';}
+}
+
+async function adminSaveKOTeams(){
+  const toSave=[];
+  KNOCKOUT_MATCHES.forEach(m=>{
+    const fix=koFixtures[sid(m.id)];if(fix&&fix.teams_locked)return;
+    const t1El=document.getElementById('adt1-'+m.id);const t2El=document.getElementById('adt2-'+m.id);
+    if(!t1El||!t2El)return;
+    const t1=t1El.value.trim();const t2=t2El.value.trim();
+    if(!t1||!t2)return;
+    if(t1===t2){showToast(`Match #${m.id}: both teams are the same — skipped.`,'warn');return;}
+    toSave.push({id:m.id,team1:t1,team2:t2,teams_locked:true});
+  });
+  if(!toSave.length){showToast('No new team assignments to save.','warn');return;}
+  if(!confirm(`Set teams for ${toSave.length} match(es) globally? This will wipe existing predictions for those matches from ALL users and cannot be undone.`))return;
+  const {error:matchErr}=await supabaseClient.from('matches').upsert(toSave,{onConflict:'id'});
+  if(matchErr){showToast('Error saving teams: '+matchErr.message,'error');return;}
+  const matchIds=toSave.map(x=>x.id);
+  const {error:wipeErr}=await supabaseClient.from('predictions').delete().in('match_id',matchIds);
+  if(wipeErr){showToast('Teams saved but failed to wipe old predictions: '+wipeErr.message,'error');}
+  toSave.forEach(row=>{koFixtures[sid(row.id)]={team1:row.team1,team2:row.team2,teams_locked:true};});
+  showToast(`✅ Teams set for ${toSave.length} match(es). Old predictions wiped.`);
+  adminRenderTabs();
+}
+
+async function adminSaveResults(){
+  const supabaseUpdates=[];
+  if(adminRound==='Groups'){
+    GROUP_MATCHES.forEach(m=>{
+      const r1=document.getElementById('ar1-'+m.id);const r2=document.getElementById('ar2-'+m.id);const cd=document.getElementById('acd-'+m.id);
+      if(!r1||!r2||!cd)return;if(r1.value===''&&r2.value==='')return;
+      const g1val=parseInt(r1.value)||0;const g2val=parseInt(r2.value)||0;const isCompleted=cd.checked;
+      actuals[sid(m.id)]={g1:g1val,g2:g2val,pen1:null,pen2:null,completed:isCompleted};
+      supabaseUpdates.push({id:m.id,actual_score1:g1val,actual_score2:g2val,completed:isCompleted,actual_pen1:null,actual_pen2:null});
+    });
+  } else if(adminRound==='KO-Results'){
+    KNOCKOUT_MATCHES.filter(m=>koFixtures[sid(m.id)]?.teams_locked).forEach(m=>{
+      const r1=document.getElementById('ar1-'+m.id);const r2=document.getElementById('ar2-'+m.id);const cd=document.getElementById('acd-'+m.id);
+      if(!r1||!r2||!cd)return;if(r1.value===''&&r2.value==='')return;
+      const g1val=parseInt(r1.value)||0;const g2val=parseInt(r2.value)||0;const isCompleted=cd.checked;
+      let pen1val=null,pen2val=null;
+      const ap1=document.getElementById('apen1-'+m.id);const ap2=document.getElementById('apen2-'+m.id);
+      if(ap1&&ap2&&g1val===g2val&&ap1.value.trim()!==''){pen1val=parseInt(ap1.value)||0;pen2val=parseInt(ap2.value)||0;}
+      actuals[sid(m.id)]={g1:g1val,g2:g2val,pen1:pen1val,pen2:pen2val,completed:isCompleted};
+      supabaseUpdates.push({id:m.id,actual_score1:g1val,actual_score2:g2val,completed:isCompleted,actual_pen1:pen1val,actual_pen2:pen2val});
+    });
+  }
+  if(!supabaseUpdates.length){showToast('No results to save.','warn');return;}
+  const{error:matchErr}=await supabaseClient.from('matches').upsert(supabaseUpdates,{onConflict:'id'});
+  if(matchErr){showToast('Save failed: '+matchErr.message,'error');return;}
+  showToast(`✅ ${supabaseUpdates.length} results saved — recalculating leaderboard…`);
+  setTimeout(async()=>{
+    await fetchAllMatches();
+    await recalcAndPushLeaderboard();
+    adminRenderMatches();
+  },500);
+}
+
+async function recalcAndPushLeaderboard(){
+  try{
+    const{data:preds,error:pErr}=await supabaseClient.from('predictions').select('user_id,match_id,pred_score1,pred_score2,pred_pen1,pred_pen2,doubled');
+    if(pErr){showToast('Recalc error: '+pErr.message,'error');return;}
+    const{data:users,error:uErr}=await supabaseClient.from('users').select('id,name,email');
+    if(uErr){showToast('Recalc error: '+uErr.message,'error');return;}
+    const userMap={};(users||[]).forEach(u=>{userMap[u.id]={name:u.name,email:u.email};});
+    const byUser={};
+    const isGroupMatch=(mid)=>mid>=1&&mid<=72;
+    (preds||[]).forEach(row=>{
+      if(!byUser[row.user_id])byUser[row.user_id]={
+        exact:0,margin:0,result:0,missed:0,doubleBonus:0,total:0,doublesUsed:0,
+        groupPts:0,groupExact:0,groupMargin:0,groupResult:0,
+        koPts:0,koExact:0,koMargin:0,koResult:0
+      };
+      const u=byUser[row.user_id];
+      const actual=actuals[sid(row.match_id)];if(!actual||!actual.completed)return;
+      const pred={g1:row.pred_score1,g2:row.pred_score2,pen1:row.pred_pen1,pen2:row.pred_pen2,doubled:row.doubled};
+      const{pts,tier,penPts,penTier,hasPen}=calcMatchScore(pred,actual);
+      const multiplier=row.doubled?2:1;
+      const finalPts=(pts+penPts)*multiplier;
+      const isGroup=isGroupMatch(row.match_id);
+      if(row.doubled&&(pts+penPts)>0)u.doubleBonus+=(pts+penPts);
+      if(row.doubled)u.doublesUsed++;
+      if(tier==='exact'){u.exact++;if(isGroup)u.groupExact++;else u.koExact++;}
+      else if(tier==='margin'){u.margin++;if(isGroup)u.groupMargin++;else u.koMargin++;}
+      else if(tier==='result'){u.result++;if(isGroup)u.groupResult++;else u.koResult++;}
+      else u.missed++;
+      if(hasPen&&penTier){
+        if(penTier==='exact'){u.exact++;if(isGroup)u.groupExact++;else u.koExact++;}
+        else if(penTier==='margin'){u.margin++;if(isGroup)u.groupMargin++;else u.koMargin++;}
+        else if(penTier==='result'){u.result++;if(isGroup)u.groupResult++;else u.koResult++;}
+        else u.missed++;
+      }
+      u.total+=finalPts;
+      if(isGroup)u.groupPts+=finalPts;else u.koPts+=finalPts;
+    });
+    const lbRows=Object.entries(byUser).map(([userId,stats])=>({
+      user_id:userId,name:(userMap[userId]||{}).name||'Anonymous',email:(userMap[userId]||{}).email||null,
+      total_points:stats.total,exact_scores:stats.exact,correct_margins:stats.margin,correct_results:stats.result,
+      missed:stats.missed,doubles_used:stats.doublesUsed,
+      group_points:stats.groupPts,group_exact:stats.groupExact,group_margins:stats.groupMargin,group_results:stats.groupResult,
+      knockout_points:stats.koPts,knockout_exact:stats.koExact,knockout_margins:stats.koMargin,knockout_results:stats.koResult,
+      updated_at:new Date().toISOString()
+    }));
+    if(!lbRows.length){showToast('No scored predictions yet.','warn');return;}
+    const{error:lbErr}=await supabaseClient.from('leaderboard').upsert(lbRows,{onConflict:'user_id'});
+    if(lbErr){showToast('Leaderboard sync error: '+lbErr.message,'error');return;}
+    showToast(`📊 Leaderboard recalculated: ${lbRows.length} users updated`);
+  }catch(err){showToast('Recalc error: '+err.message,'error');}
+}
+</script>
+</body>
+</html>

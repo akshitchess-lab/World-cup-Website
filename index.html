@@ -826,6 +826,11 @@ function saveState(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(dat
 function getState(){return loadState();}
 function setState(partial){const s=loadState();Object.assign(s,partial);saveState(s);return s;}
 function sid(id){return String(id);}
+document.addEventListener('wheel', function(e) {
+  if (document.activeElement && document.activeElement.type === 'number') {
+    document.activeElement.blur();
+  }
+}, { passive: true });
 function hasSaved(s,id){const sid_str=sid(id);return Array.isArray(s.savedMatches)&&s.savedMatches.some(x=>sid(x)===sid_str);}
 function markSaved(s,id){if(!Array.isArray(s.savedMatches))s.savedMatches=[];const sid_str=sid(id);if(!s.savedMatches.some(x=>sid(x)===sid_str))s.savedMatches.push(parseInt(id));}
 

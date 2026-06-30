@@ -227,7 +227,11 @@ const KNOCKOUT_MATCHES = [
 const KO_ROUND_ORDER = ['R32','R16','QF','SF','3P','F'];
 
 function sid(id){return String(id);}
-
+document.addEventListener('wheel', function(e) {
+  if (document.activeElement && document.activeElement.type === 'number') {
+    document.activeElement.blur();
+  }
+}, { passive: true });
 function showToast(msg,type='success'){
   const c=document.getElementById('toast-container');const t=document.createElement('div');
   t.className=`toast${type==='warn'?' warn':type==='error'?' error':''}`;t.textContent=msg;c.appendChild(t);
